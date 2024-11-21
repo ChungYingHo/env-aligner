@@ -23,7 +23,8 @@ module.exports = [
       file: 'dist/cli.min.js',
       format: 'cjs',
       sourcemap: true,
-      exports: 'default'
+      exports: 'default',
+      banner: '#!/usr/bin/env node'
     },
     plugins: [
       terser(),
