@@ -15,7 +15,8 @@ envAligner({schemaFileName: '.env.example'}) // 檢查指定 .env.sample 與預�
 envAligner({envFileName: '.env.local'}) // 檢查預設 .env.example 與指定 .env.local
 ```
 
-### 在終端機中執行 (還沒實現)
+### 在終端機中執行 (實現一半，現在前面都得加 `npx` 才能執行)
+不加 `npx` 會打開 cli.js 檔案的問題需要處理掉
 ```bash
 env-aligner // 檢查預設 .env 與預設 .env.example
 env-aligner -s .env.sample -e .env.local // 檢查指定 .env.sample 與指定 .env.local
@@ -54,3 +55,7 @@ ENV_WITH_EMPTY_VALUE_IN_ENV_FILE='should not pass'
 5. 在終端機中執行 `node test.js`
 
 ![](./asset/shortcut.png)
+
+6. 在終端機中執行 `npx env-aligner`
+
+![](./asset/shortcut-2.png)
