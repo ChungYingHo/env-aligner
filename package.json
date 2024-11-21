@@ -1,9 +1,14 @@
 {
   "name": "env-aligner",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.min.js",
+  "bin": {
+    "env-aligner": "dist/cli.min.js"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "rollup -c -w",
+    "build": "rmdir /s /q dist && rollup -c"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +20,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
+    "@rollup/plugin-commonjs": "^28.0.1",
+    "@rollup/plugin-json": "^6.1.0",
     "eslint": "^9.15.0",
     "globals": "^15.12.0",
     "rollup": "^2.79.2",
