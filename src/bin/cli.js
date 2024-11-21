@@ -1,9 +1,8 @@
 const chalk = require("chalk")
-const commander = require("commander")
+const { program, Option } = require("commander")
 const envAligner = require("../lib")
 const { version } = require("../../package.json")
 
-const { program, Option } = commander
 const defaultSchemaFileName = '.env.example'
 const defaultEnvFileName = '.env'
 const defaultDir = process.cwd()
