@@ -13,7 +13,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "1. .env 缺少 .env.example 的變數時會叫\r 2. .env 變數缺值時會叫\r 3. .env 有重複變數時會叫\r 4. .env 有多餘變數時會叫",
   "dependencies": {
     "chalk": "^4.1.2",
     "commander": "^12.1.0",
