@@ -93,6 +93,19 @@ const envAligner = async (rootDir = defaultDir, fileNames = defaultFiles, checkO
   if (rootDir === 'use default') {
     rootDir = defaultDir
   }
+
+  try {
+    // 檢查 rootDir 是否存在且是目錄
+    const stats = await fs.promises.stat(rootDir)
+    if (!stats.isDirectory()) {
+      throw new Error(`${rootDir} is not a valid directory`)
+    }
+  // eslint-disable-next-line no-unused-vars
+  } catch (error) {
+    console.error(chalk.red(`\nError: ${rootDir} does not exist or is not accessible.`))
+    process.exit(1)
+  }
+
   const { schemaName: schemaFileName, envName: envFileName } = fileNames
 
   // 使用 fs.promises.readdir 來非同步列出目錄

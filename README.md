@@ -28,7 +28,7 @@ We also provide some options for you to customize the check:
 3. `checkOptions`: An object that contains the options of what you want to check. Default we put all options as `true`.
 
 ```javascript
-const rootDir = 'frontend' // You can also use 'use default' to use the default root directory
+const rootDir = 'frontend'
 const fileNames = {
   schemaName: '.env.sample',
   envName: '.env.local'
@@ -47,9 +47,9 @@ envAligner({fileNames: fileNames})
 ```
 
 ### Use in terminal
-We also provide a command line tool for you to use.
+We also provide a command line tool for you to use. The check will use the default `.env` and `.env.example` files.
 ```bash
-env-aligner // Check the default .env and .env.example
+npx env-aligner
 ```
 
 Also, you can use some options to customize the check:
@@ -63,9 +63,13 @@ Also, you can use some options to customize the check:
 | -x, --extra | Check the extra variables | `false` |
 
 ```bash
-env-aligner -s .env.sample -e .env.local // Check the specified .env.sample and .env.local
-env-aligner -s .env.example // Check the specified .env.example and default .env
+# Check the specified .env.sample and .env.local
+npx env-aligner -s .env.sample -e .env.local
 
-env-aligner -m false -n false -x false // Do not check missing, empty value, and extra
+# Check the specified .env.example and default .env
+npx env-aligner -s .env.example 
+
+# Do not check missing, empty value, and extra
+npx env-aligner -m false -n false -x false
 ```
 
