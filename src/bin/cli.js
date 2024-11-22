@@ -7,11 +7,18 @@ const defaultSchemaFileName = '.env.example'
 const defaultEnvFileName = '.env'
 const defaultDir = process.cwd()
 
+/**
+ * 指令使用方式：
+ * npx env-aligner -s .env.example -e .env
+ * npx env-aligner -s .env.example
+ * npx env-aligner -e .env
+ * npx env-aligner
+ * npx env-aligner -m false -n false -d false -x false
+ */
 program
   .name("env-aligner")
   .description("A tool to align the env variables in the project")
   .version(version, '-v', '--version')
-  .addHelpCommand(false) // 禁用預設的 --help 選項
   .showSuggestionAfterError() // 顯示錯誤時的建議
   .addHelpText('beforeAll', () => {
     console.log(chalk.green('Env Aligner is working!'))
@@ -39,7 +46,6 @@ const { INIT_CWD } = process.env
 const rootDir = INIT_CWD || defaultDir
 
 // 取得參數
-// const { schemaFileName = defaultSchemaFileName, envFileName = defaultEnvFileName } = program.opts()
 const {
   schemaFileName = defaultSchemaFileName,
   envFileName = defaultEnvFileName,

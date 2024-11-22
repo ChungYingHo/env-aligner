@@ -1,4 +1,5 @@
 ## 預期套件功能
+以下皆為可選擇的功能
 1. .env 缺少 .env.example 的變數時會叫
 2. .env 變數缺值時會叫
 3. .env 有重複變數時會叫
@@ -9,10 +10,23 @@
 ```
 const envAligner = require('env-aligner')
 
+// 如果想客製檢查的對象與選項
+const rootDir = 'frontend' // 可以傳 'use default'，那系統會用 `process.cwd()` 作為根目錄
+const customFileNamesObject = {
+  schemaName: '.env.sample',
+  envName: '.env.local'
+}
+const customCheckOptionsObject = {
+  isCheckMissing: true,
+  isCheckEmptyValue: true,
+  isCheckDuplicate: true,
+  isCheckExtra: false
+}
+
 envAligner() // 檢查預設 .env 與預設 .env.example
-envAligner('.env.sample', '.env.local') // 檢查指定 .env.sample 與指定 .env.local
-envAligner({schemaFileName: '.env.example'}) // 檢查指定 .env.sample 與預設 .env
-envAligner({envFileName: '.env.local'}) // 檢查預設 .env.example 與指定 .env.local
+envAligner(rootDir, fileNames, checkOptions)
+envAligner({fileNames: customFileNamesObject})
+envAligner({checkOptions: customCheckOptionsObject})
 ```
 
 ### 在終端機中執行 (實現一半，現在前面都得加 `npx` 才能執行)
@@ -22,6 +36,7 @@ env-aligner // 檢查預設 .env 與預設 .env.example
 env-aligner -s .env.sample -e .env.local // 檢查指定 .env.sample 與指定 .env.local
 env-aligner -s .env.example // 檢查指定 .env.sample 與預設 .env
 env-aligner -e .env.local // 檢查預設 .env.example 與指定 .env.local
+env-aligner -m false -n false -d false -x false // 不檢查缺少、空值、重複、多餘
 ```
 
 ## 如何測試

@@ -43,6 +43,10 @@ const parseEnvFile = (filePath) => {
 const checkEnvVariables = (schemaPath, envPath, checkOptions) => {
   const { isCheckMissing, isCheckEmptyValue, isCheckDuplicate, isCheckExtra } = checkOptions
 
+  if (!isCheckMissing && !isCheckEmptyValue && !isCheckDuplicate && !isCheckExtra) {
+    console.log(chalk.hex('#ff69b4').inverse('You have disabled all checks, nothing to do.'))
+  }
+
   const schemaVars = parseEnvFile(schemaPath)
   const envVars = parseEnvFile(envPath)
 
@@ -85,11 +89,18 @@ const checkEnvVariables = (schemaPath, envPath, checkOptions) => {
 
 /**
  * 主程式，遞迴檢查目錄中的 env file 和 schema 檔案
+ * 函式使用方式：
+ * envAligner(rootDir, fileNames, checkOptions)
+ * envAligner({fileNames: customFileNamesObject})
+ * envAligner({checkOptions: customCheckOptionsObject})
  * @param {string} rootDir 根目錄
  * @param {string} schemaFileName schema 檔案名稱
  * @param {string} envFileName env 檔案名稱
  */
 const envAligner = async (rootDir = defaultDir, fileNames = defaultFiles, checkOptions = defaultOptions) => {
+  if (rootDir === 'use default') {
+    rootDir = defaultDir
+  }
   const { schemaName: schemaFileName, envName: envFileName } = fileNames
 
   // 使用 fs.promises.readdir 來非同步列出目錄
