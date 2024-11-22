@@ -1,8 +1,15 @@
 {
   "name": "env-aligner",
-  "version": "1.0.0-beta",
+  "version": "1.0.0-beta.0",
   "description": "A developer-friendly tool for validating and aligning environment variables in .env files against schema files (e.g., .env.example). It helps identify missing variables, empty values, or extra entries, ensuring a consistent and error-free environment setup.",
-  "keywords": [".env", ".env.example", "dotenv", "environment variables", "check", "align"],
+  "keywords": [
+    ".env",
+    ".env.example",
+    "dotenv",
+    "environment variables",
+    "check",
+    "align"
+  ],
   "homepage": "https://github.com/ChungYingHo/env-aligner",
   "bugs": {
     "url": "https://github.com/ChungYingHo/env-aligner/issues"
