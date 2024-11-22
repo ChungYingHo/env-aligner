@@ -13,7 +13,6 @@ const defaultFiles = {
 const defaultOptions = {
   isCheckMissing: true,
   isCheckEmptyValue: true,
-  isCheckDuplicate: true,
   isCheckExtra: true
 }
 
@@ -42,20 +41,17 @@ const parseEnvFile = (filePath) => {
  */
 const checkEnvVariables = (schemaPath, envPath, checkOptions) => {
   const { isCheckMissing, isCheckEmptyValue, isCheckDuplicate, isCheckExtra } = checkOptions
-
   if (!isCheckMissing && !isCheckEmptyValue && !isCheckDuplicate && !isCheckExtra) {
     console.log(chalk.hex('#ff69b4').inverse('You have disabled all checks, nothing to do.'))
   }
 
   const schemaVars = parseEnvFile(schemaPath)
   const envVars = parseEnvFile(envPath)
-
   const schemaKeys = Object.keys(schemaVars)
   const envKeys = Object.keys(envVars)
 
   const missingKeys = isCheckMissing ? schemaKeys.filter(key => !envKeys.includes(key)) : []
   const emptyValueKeys = isCheckEmptyValue ? schemaKeys.filter(key => schemaVars[key] && !envVars[key] && !missingKeys.includes(key)) : []
-  const duplicateKeys = isCheckDuplicate ? envKeys.filter((key, index, self) => self.indexOf(key) !== index) : []
   const extraKeys = isCheckExtra ? envKeys.filter(key => !schemaKeys.includes(key)) : []
 
   const envDir = path.dirname(envPath)
@@ -70,17 +66,12 @@ const checkEnvVariables = (schemaPath, envPath, checkOptions) => {
     console.log(chalk.hex('#FFA500')(`${emptyValueKeys.join('、')}`))
   }
 
-  if (duplicateKeys.length > 0) {
-    console.error(chalk.yellow.inverse(`\nDuplicate variables in ${envDir}`))
-    console.log(chalk.yellow(`${duplicateKeys.join('、')}`))
-  }
-
   if (extraKeys.length > 0) {
     console.error(chalk.blue.inverse(`\nExtra variables in ${envDir}`))
     console.log(chalk.blue(`${extraKeys.join('、')}`))
   }
 
-  if (missingKeys.length > 0 || emptyValueKeys.length > 0 || duplicateKeys.length > 0 || extraKeys.length > 0) {
+  if (missingKeys.length > 0 || emptyValueKeys.length > 0 ) { 
     process.exit(1)
   } else {
     console.log(chalk.green.inverse(`\nAll variables in ${envDir} are correct!`))
@@ -98,6 +89,7 @@ const checkEnvVariables = (schemaPath, envPath, checkOptions) => {
  * @param {string} envFileName env 檔案名稱
  */
 const envAligner = async (rootDir = defaultDir, fileNames = defaultFiles, checkOptions = defaultOptions) => {
+ 
   if (rootDir === 'use default') {
     rootDir = defaultDir
   }
@@ -109,8 +101,8 @@ const envAligner = async (rootDir = defaultDir, fileNames = defaultFiles, checkO
   await Promise.all(entries.map(async (entry) => {
     const entryPath = path.join(rootDir, entry.name) // 組合檔案或目錄的路徑
 
-    if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== 'dist') {
-      await envAligner(entryPath, schemaFileName, envFileName) // 如果是目錄，遞迴調用 envAligner
+    if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== 'dist' ) {
+      await envAligner(entryPath, fileNames, checkOptions) // 如果是目錄，遞迴調用 envAligner
     } else if (entry.isFile() && entry.name === schemaFileName) {
       const envFilePath = path.join(rootDir, envFileName)
 

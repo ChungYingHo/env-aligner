@@ -2,8 +2,7 @@
 以下皆為可選擇的功能
 1. .env 缺少 .env.example 的變數時會叫
 2. .env 變數缺值時會叫
-3. .env 有重複變數時會叫
-4. .env 有多餘變數時會叫
+3. .env 有多餘變數時會叫
 
 ## 使用方式
 ### 在程式中引入
@@ -19,7 +18,6 @@ const customFileNamesObject = {
 const customCheckOptionsObject = {
   isCheckMissing: true,
   isCheckEmptyValue: true,
-  isCheckDuplicate: true,
   isCheckExtra: false
 }
 
@@ -36,7 +34,7 @@ env-aligner // 檢查預設 .env 與預設 .env.example
 env-aligner -s .env.sample -e .env.local // 檢查指定 .env.sample 與指定 .env.local
 env-aligner -s .env.example // 檢查指定 .env.sample 與預設 .env
 env-aligner -e .env.local // 檢查預設 .env.example 與指定 .env.local
-env-aligner -m false -n false -d false -x false // 不檢查缺少、空值、重複、多餘
+env-aligner -m false -n false -x false // 不檢查缺少、空值、多餘
 ```
 
 ## 如何測試
