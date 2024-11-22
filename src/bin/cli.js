@@ -18,6 +18,10 @@ program
   })
   .addOption(new Option('-s, --schema <schema>', 'The schema file for environment variables, default is .env.example.').default('.env.example'))
   .addOption(new Option('-e, --env <env>', 'The env file to check, default is .env.').default('.env'))
+  .addOption(new Option('-m, --missing', 'Check missing variables in the env file.').default(true))
+  .addOption(new Option('-n, --empty', 'Check empty value variables in the env file.').default(true))
+  .addOption(new Option('-d, --duplicate', 'Check duplicate variables in the env file.').default(true))
+  .addOption(new Option('-x, --extra', 'Check extra variables in the env file.').default(true))
   .addHelpText('after', 
     `
     Examples:
@@ -35,8 +39,28 @@ const { INIT_CWD } = process.env
 const rootDir = INIT_CWD || defaultDir
 
 // 取得參數
-const { schemaFileName = defaultSchemaFileName, envFileName = defaultEnvFileName } = program.opts()
+// const { schemaFileName = defaultSchemaFileName, envFileName = defaultEnvFileName } = program.opts()
+const {
+  schemaFileName = defaultSchemaFileName,
+  envFileName = defaultEnvFileName,
+  checkMissing = true,
+  checkEmpty = true,
+  checkDuplicate = true,
+  checkExtra = true
+} = program.opts()
+
+const customFileNames= {
+  schemaName: schemaFileName,
+  envName: envFileName
+}
+
+const customOptions = {
+  isCheckMissing: checkMissing,
+  isCheckEmptyValue: checkEmpty,
+  isCheckDuplicate: checkDuplicate,
+  isCheckExtra: checkExtra
+}
 
 
 // 執行 envAligner
-envAligner(rootDir, schemaFileName, envFileName)
+envAligner(rootDir, customFileNames, customOptions)

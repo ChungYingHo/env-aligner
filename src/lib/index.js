@@ -3,9 +3,20 @@ const path = require('path')
 const dotenv = require('dotenv')
 const chalk = require('chalk')
 
+const defaultDir = process.cwd()
 const defaultSchemaFileName = '.env.example'
 const defaultEnvFileName = '.env'
-const defaultDir = process.cwd()
+const defaultFiles = {
+  schemaName: defaultSchemaFileName,
+  envName: defaultEnvFileName
+}
+const defaultOptions = {
+  isCheckMissing: true,
+  isCheckEmptyValue: true,
+  isCheckDuplicate: true,
+  isCheckExtra: true
+}
+
 
 /**
  * 解析環境變數
@@ -29,17 +40,19 @@ const parseEnvFile = (filePath) => {
  * @param {string} schemaPath 
  * @param {string} envPath 
  */
-const checkEnvVariables = (schemaPath, envPath) => {
+const checkEnvVariables = (schemaPath, envPath, checkOptions) => {
+  const { isCheckMissing, isCheckEmptyValue, isCheckDuplicate, isCheckExtra } = checkOptions
+
   const schemaVars = parseEnvFile(schemaPath)
   const envVars = parseEnvFile(envPath)
 
   const schemaKeys = Object.keys(schemaVars)
   const envKeys = Object.keys(envVars)
 
-  const missingKeys = schemaKeys.filter(key => !envKeys.includes(key))
-  const emptyValueKeys = schemaKeys.filter(key => schemaVars[key] && !envVars[key] && !missingKeys.includes(key))
-  const duplicateKeys = envKeys.filter((key, index, self) => self.indexOf(key) !== index)
-  const extraKeys = envKeys.filter(key => !schemaKeys.includes(key))
+  const missingKeys = isCheckMissing ? schemaKeys.filter(key => !envKeys.includes(key)) : []
+  const emptyValueKeys = isCheckEmptyValue ? schemaKeys.filter(key => schemaVars[key] && !envVars[key] && !missingKeys.includes(key)) : []
+  const duplicateKeys = isCheckDuplicate ? envKeys.filter((key, index, self) => self.indexOf(key) !== index) : []
+  const extraKeys = isCheckExtra ? envKeys.filter(key => !schemaKeys.includes(key)) : []
 
   const envDir = path.dirname(envPath)
 
@@ -76,11 +89,12 @@ const checkEnvVariables = (schemaPath, envPath) => {
  * @param {string} schemaFileName schema 檔案名稱
  * @param {string} envFileName env 檔案名稱
  */
-const envAligner = async (rootDir = defaultDir, schemaFileName = defaultSchemaFileName, envFileName = defaultEnvFileName) => {
+const envAligner = async (rootDir = defaultDir, fileNames = defaultFiles, checkOptions = defaultOptions) => {
+  const { schemaName: schemaFileName, envName: envFileName } = fileNames
+
   // 使用 fs.promises.readdir 來非同步列出目錄
   const entries = await fs.promises.readdir(rootDir, { withFileTypes: true })
 
-  // 使用 Promise.all 非同步處理每個檔案和子目錄
   await Promise.all(entries.map(async (entry) => {
     const entryPath = path.join(rootDir, entry.name) // 組合檔案或目錄的路徑
 
@@ -90,8 +104,8 @@ const envAligner = async (rootDir = defaultDir, schemaFileName = defaultSchemaFi
       const envFilePath = path.join(rootDir, envFileName)
 
       try {
-        await fs.promises.stat(envFilePath) // 使用 fs.promises.stat 來非同步檢查 .env 檔案是否存在
-        checkEnvVariables(entryPath, envFilePath) // 如果檔案存在，檢查環境變數
+        await fs.promises.stat(envFilePath)
+        checkEnvVariables(entryPath, envFilePath, checkOptions)
       // eslint-disable-next-line no-unused-vars
       } catch (error) {
         console.warn(chalk.yellow(`\nNo matching env file found for ${entryPath}`))
