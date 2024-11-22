@@ -1,6 +1,21 @@
 {
   "name": "env-aligner",
   "version": "1.0.0",
+  "description": "A developer-friendly tool for validating and aligning environment variables in .env files against schema files (e.g., .env.example). It helps identify missing variables, empty values, or extra entries, ensuring a consistent and error-free environment setup.",
+  "keywords": [".env", ".env.example", "dotenv", "environment variables", "check", "align"],
+  "homepage": "https://github.com/ChungYingHo/env-aligner",
+  "bugs": {
+    "url": "https://github.com/ChungYingHo/env-aligner/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ChungYingHo/env-aligner.git"
+  },
+  "contributors": [
+    "Jeremy Ho <ag.cyho@gmail.com>(https://codefictionist.com/)",
+    "MJC <5iftisland@gmail.com>(https://github.com/JuiCheng)"
+  ],
+  "license": "MIT",
   "main": "dist/index.min.js",
   "bin": {
     "env-aligner": "dist/cli.min.js"
@@ -10,10 +25,6 @@
     "dev": "rollup -c -w",
     "build": "rmdir /s /q dist && rollup -c"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "chalk": "^4.1.2",
     "commander": "^12.1.0",
@@ -27,5 +38,8 @@
     "globals": "^15.12.0",
     "rollup": "^2.79.2",
     "rollup-plugin-terser": "^7.0.2"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }
