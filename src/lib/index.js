@@ -142,11 +142,12 @@ const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, chec
     // 檢查 rootDir 是否存在且是目錄
     const stats = await fs.promises.stat(rootDir)
     if (!stats.isDirectory()) {
-      throw new Error(`${rootDir} is not a valid directory`)
+      console.error(chalk.inverse.red(`\nError: ${rootDir} is not a directory.`))
+      process.exit(1)
     }
   // eslint-disable-next-line no-unused-vars
   } catch (error) {
-    console.error(chalk.red(`\nError: ${rootDir} does not exist or is not accessible.`))
+    console.error(chalk.inverse.red(`\nError: ${rootDir} does not exist or is not accessible.`))
     process.exit(1)
   }
 
