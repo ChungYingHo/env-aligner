@@ -132,7 +132,7 @@ const checkEnvVariables = (schemaPath, envPath, checkOptions) => {
  * @param {string} schemaFileName schema 檔案名稱
  * @param {string} envFileName env 檔案名稱
  */
-const envAligner = async (rootDir = defaultDir, fileNames = defaultFiles, checkOptions = defaultOptions) => {
+const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, checkOptions = defaultOptions } = {}) => {
  
   if (rootDir === 'use default') {
     rootDir = defaultDir
@@ -161,7 +161,7 @@ const envAligner = async (rootDir = defaultDir, fileNames = defaultFiles, checkO
     const entryPath = path.join(rootDir, entry.name) // 組合檔案或目錄的路徑
 
     if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== 'dist' ) {
-      await envAligner(entryPath, fileNames, checkOptions) // 如果是目錄，遞迴調用 envAligner
+      await envAligner({ rootDir: entryPath, fileNames, checkOptions }) // 如果是目錄，遞迴調用 envAligner
     } else if (entry.isFile() && entry.name === schemaFileName) {
       const envFilePath = path.join(rootDir, envFileName)
 

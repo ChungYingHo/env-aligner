@@ -66,4 +66,4 @@ const customOptions = {
 
 
 // 執行 envAligner
-envAligner(rootDir, customFileNames, customOptions)
+envAligner({ rootDir, fileNames: customFileNames, checkOptions: customOptions })
