@@ -83,10 +83,11 @@ const validateFileNames = (fileNames) => {
 const checkEnvVariables = (schemaPath, envPath, checkOptions) => {
   const mergedOptions = { ...defaultOptions, ...checkOptions }
   validateOptions(mergedOptions)
-  const { isCheckMissing, isCheckEmptyValue, isCheckDuplicate, isCheckExtra } = mergedOptions
+  const { isCheckMissing, isCheckEmptyValue, isCheckExtra } = mergedOptions
 
-  if (!isCheckMissing && !isCheckEmptyValue && !isCheckDuplicate && !isCheckExtra) {
+  if (!isCheckMissing && !isCheckEmptyValue && !isCheckExtra) {
     console.log(chalk.hex('#ff69b4').inverse('You have disabled all checks, nothing to do.'))
+    process.exit(0)
   }
 
   const schemaVars = parseEnvFile(schemaPath)
@@ -133,11 +134,6 @@ const checkEnvVariables = (schemaPath, envPath, checkOptions) => {
  * @param {string} envFileName env 檔案名稱
  */
 const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, checkOptions = defaultOptions } = {}) => {
- 
-  if (rootDir === 'use default') {
-    rootDir = defaultDir
-  }
-
   try {
     // 檢查 rootDir 是否存在且是目錄
     const stats = await fs.promises.stat(rootDir)

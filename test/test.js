@@ -9,6 +9,14 @@ const envAligner = require('../src/lib/index')
 // }
 // envAligner({ checkOptions: test1options })
 
+// 傳全 false 進去
+const checkOptions = {
+  isCheckMissing: false,
+  isCheckEmptyValue: false,
+  isCheckExtra: false
+}
+envAligner({ checkOptions })
+
 // 傳一個路徑 frontend
 // const rootDir = 'frontend'
 // envAligner({ rootDir })
@@ -17,7 +25,7 @@ const envAligner = require('../src/lib/index')
 // const rootDir = 'test/test_folder/frontend'
 // envAligner({ rootDir })
 
-// 傳路徑 'use default'
+// 傳路徑 'use default' - 棄用
 // const rootDir = 'use default'
 // envAligner({ rootDir })
 
@@ -29,8 +37,15 @@ const envAligner = require('../src/lib/index')
 // envAligner({ fileNames })
 
 // 傳 .env.sample 與 .env
-const fileNames = {
-  schemaName: '.env.sample',
-  envName: '.env'
-}
-envAligner({ fileNames })
+// const fileNames = {
+//   schemaName: '.env.sample',
+//   envName: '.env'
+// }
+// envAligner({ fileNames })
+
+// 傳 .env.schema 與 .env
+// const fileNames = {
+//   schemaName: '.env.schema',
+//   envName: '.env'
+// }
+// envAligner({ fileNames })
