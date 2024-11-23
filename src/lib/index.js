@@ -171,7 +171,7 @@ const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, chec
         checkEnvVariables(entryPath, envFilePath, checkOptions)
       // eslint-disable-next-line no-unused-vars
       } catch (error) {
-        console.warn(chalk.yellow(`\nNo matching env file found for ${entryPath}`))
+        console.warn(chalk.inverse.yellow(`\nNo matching env file found for ${entryPath} in same directory.`))
       }
     }
   }))
