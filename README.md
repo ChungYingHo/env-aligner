@@ -23,24 +23,28 @@ envAligner()
 ```
 
 We also provide some options for you to customize the check:
-1. `rootDir`: The root directory of your project. Default is `process.cwd()`. And you can also use `use default` to use the default root directory.
-2. `fileNames`: An object that contains the file names of what you want to check. Default is `.env` and `.env.example`.
+1. `rootDir`: Default is `process.cwd()`. You can specify the root directory of your project.
+    - Notice: You must provide the correct path. We discover if lost the middle folder, our error handler will not catch in this situation.
+2. `fileNames`: An object that contains the file names of what you want to check.
+    - `schemaName`: The file name of the schema file. Default is `.env.example`.
+    - `envName`: The file name of the environment file. Default is `.env`.
 3. `checkOptions`: An object that contains the options of what you want to check. Default we put all options as `true`.
+    - `isCheckMissing`: Check the missing variables. Default is `true`.
+    - `isCheckEmptyValue`: Check the missing values. Default is `true`.
+    - `isCheckExtra`: Check the extra variables. Default is `false`.
 
 ```javascript
-const rootDir = 'frontend'
-const fileNames = {
+const customRootDir = 'test/test_folder/application/frontend'
+const customFileNames = {
   schemaName: '.env.sample',
   envName: '.env.local'
 }
-const checkOptions = {
-  isCheckMissing: true,
-  isCheckEmptyValue: true,
+const customCheckOptions = {
   isCheckExtra: false
 }
 
 
-envAligner(rootDir, fileNames, checkOptions)
+envAligner({ rootDir: customRootDir, fileNames: customFileNames, checkOptions: customCheckOptions })
 
 // or you can only pass a parameter by this way
 envAligner({fileNames: fileNames})

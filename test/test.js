@@ -10,12 +10,12 @@ const envAligner = require('../src/lib/index')
 // envAligner({ checkOptions: test1options })
 
 // 傳全 false 進去
-const checkOptions = {
-  isCheckMissing: false,
-  isCheckEmptyValue: false,
-  isCheckExtra: false
-}
-envAligner({ checkOptions })
+// const checkOptions = {
+//   isCheckMissing: false,
+//   isCheckEmptyValue: false,
+//   isCheckExtra: false
+// }
+// envAligner({ checkOptions })
 
 // 傳一個路徑 frontend
 // const rootDir = 'frontend'
@@ -49,3 +49,14 @@ envAligner({ checkOptions })
 //   envName: '.env'
 // }
 // envAligner({ fileNames })
+
+// 全傳客製化參數
+const customRootDir = 'test/test_folder/application/frontend'
+const customFileNames = {
+  schemaName: '.env.sample',
+  envName: '.env.local'
+}
+const customCheckOptions = {
+  isCheckExtra: false
+}
+envAligner({ rootDir: customRootDir, fileNames: customFileNames, checkOptions: customCheckOptions })
