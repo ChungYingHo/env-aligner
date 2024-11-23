@@ -34,13 +34,57 @@ const parseEnvFile = (filePath) => {
   return parsedContent
 }
 
+
+/**
+ * 這個函式會檢查 options 物件是否有缺少必要的 key 或是 key 的值不是 boolean
+ * @param {object} options 
+ */
+const validateOptions = (options) => {
+  const requiredKeys = ['isCheckMissing', 'isCheckEmptyValue', 'isCheckExtra']
+
+  requiredKeys.forEach(key => {
+    if(!(key in options)) {
+      console.error(chalk.red.inverse(`\nMissing required key: ${key}`)) // 這句沒意外應該都不會出現，如果出現表示 bug 出現
+      process.exit(1)
+    }
+
+    if (typeof options[key] !== 'boolean') {
+      console.error(chalk.red.inverse(`\n${key} must be a boolean`))
+      process.exit(1)
+    }
+  })
+}
+
+/**
+ * 這個函式會檢查 fileNames 物件是否有缺少必要的 key 或是 key 的值不是 string
+ * @param {string} fileNames 
+ */
+const validateFileNames = (fileNames) => {
+  const requiredKeys = ['schemaName', 'envName']
+
+  requiredKeys.forEach(key => {
+    if(!(key in fileNames)) {
+      console.error(chalk.red.inverse(`\nMissing required key: ${key}`)) // 這句沒意外應該都不會出現，如果出現表示 bug 出現
+      process.exit(1)
+    }
+
+    if (typeof fileNames[key] !== 'string') {
+      console.error(chalk.red.inverse(`\n${key} must be a string`))
+      process.exit(1)
+    }
+  })
+}
+
 /**
  * 會檢查 schema 檔案中的變數是否都有在 env 檔案中出現
  * @param {string} schemaPath 
  * @param {string} envPath 
  */
 const checkEnvVariables = (schemaPath, envPath, checkOptions) => {
-  const { isCheckMissing, isCheckEmptyValue, isCheckDuplicate, isCheckExtra } = checkOptions
+  const mergedOptions = { ...defaultOptions, ...checkOptions }
+  validateOptions(mergedOptions)
+  const { isCheckMissing, isCheckEmptyValue, isCheckDuplicate, isCheckExtra } = mergedOptions
+
   if (!isCheckMissing && !isCheckEmptyValue && !isCheckDuplicate && !isCheckExtra) {
     console.log(chalk.hex('#ff69b4').inverse('You have disabled all checks, nothing to do.'))
   }
@@ -106,7 +150,9 @@ const envAligner = async (rootDir = defaultDir, fileNames = defaultFiles, checkO
     process.exit(1)
   }
 
-  const { schemaName: schemaFileName, envName: envFileName } = fileNames
+  const mergedFileNames = { ...defaultFiles, ...fileNames }
+  validateFileNames(mergedFileNames)
+  const { schemaName: schemaFileName, envName: envFileName } = mergedFileNames
 
   // 使用 fs.promises.readdir 來非同步列出目錄
   const entries = await fs.promises.readdir(rootDir, { withFileTypes: true })
