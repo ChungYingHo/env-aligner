@@ -51,7 +51,7 @@ const envAligner = require('../src/lib/index')
 // envAligner({ fileNames })
 
 // 全傳客製化參數
-const customRootDir = 'test/test_folder/application/frontend'
+const customRootDir = 'test'
 const customFileNames = {
   schemaName: '.env.sample',
   envName: '.env.local'

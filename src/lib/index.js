@@ -133,6 +133,7 @@ const checkEnvVariables = (schemaPath, envPath, checkOptions) => {
  * @param {string} schemaFileName schema 檔案名稱
  * @param {string} envFileName env 檔案名稱
  */
+
 const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, checkOptions = defaultOptions } = {}) => {
   try {
     // 檢查 rootDir 是否存在且是目錄
@@ -153,21 +154,47 @@ const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, chec
 
   // 使用 fs.promises.readdir 來非同步列出目錄
   const entries = await fs.promises.readdir(rootDir, { withFileTypes: true })
-
+  let flag=true
   await Promise.all(entries.map(async (entry) => {
     const entryPath = path.join(rootDir, entry.name) // 組合檔案或目錄的路徑
-
     if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== 'dist' ) {
       await envAligner({ rootDir: entryPath, fileNames, checkOptions }) // 如果是目錄，遞迴調用 envAligner
-    } else if (entry.isFile() && entry.name === schemaFileName) {
+    } else if (entry.isFile() && flag) {
+      flag=false // 同個資料夾，只執行一次檔案開啟動作
+
+      const schemaFilePath = path.join(rootDir, schemaFileName)
       const envFilePath = path.join(rootDir, envFileName)
 
+      let schemaExists = false
+      let envExists = false
+      // 檢查 schemaFilePath 是否存在
       try {
-        await fs.promises.stat(envFilePath)
-        checkEnvVariables(entryPath, envFilePath, checkOptions)
+        await fs.promises.stat(schemaFilePath)
+        schemaExists = true
       // eslint-disable-next-line no-unused-vars
       } catch (error) {
-        console.warn(chalk.inverse.yellow(`\nNo matching env file found for ${entryPath} in same directory.`))
+        schemaExists = false
+      }
+
+      // 檢查 envFilePath 是否存在
+      try {
+        await fs.promises.stat(envFilePath)
+        envExists = true
+      // eslint-disable-next-line no-unused-vars
+      } catch (error) {
+        envExists = false
+      }
+      // 根據檢查結果輸出不同訊息
+      if (schemaExists && envExists) {
+        checkEnvVariables(schemaFilePath, envFilePath, checkOptions)
+      } else {
+        if (!schemaExists && !envExists) {
+          console.warn(chalk.inverse.yellow(`\nCannot find ${schemaFileName} and ${envFileName} in ${rootDir}.`))
+        } else if (!schemaExists) {
+          console.warn(chalk.inverse.yellow(`\nCannot find ${schemaFileName} in ${rootDir}.`))
+        } else if (!envExists) {
+          console.warn(chalk.inverse.yellow(`\nCannot find ${envFileName} in ${rootDir}.`))
+        }
       }
     }
   }))
