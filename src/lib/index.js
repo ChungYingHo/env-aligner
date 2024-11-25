@@ -103,17 +103,17 @@ const checkEnvVariables = (schemaPath, envPath, checkOptions) => {
 
   if (missingKeys.length > 0) {
     console.error(chalk.red.inverse(`\nMissing variables in ${envDir}`))
-    console.log(chalk.red(`${missingKeys.join('、')}`))
+    console.log(chalk.red(`${missingKeys.join(', ')}`))
   }
 
   if (emptyValueKeys.length > 0) {
     console.error(chalk.hex('#FFA500').inverse(`\nEmpty value variables in ${envDir}`))
-    console.log(chalk.hex('#FFA500')(`${emptyValueKeys.join('、')}`))
+    console.log(chalk.hex('#FFA500')(`${emptyValueKeys.join(', ')}`))
   }
 
   if (extraKeys.length > 0) {
     console.error(chalk.blue.inverse(`\nExtra variables in ${envDir}`))
-    console.log(chalk.blue(`${extraKeys.join('、')}`))
+    console.log(chalk.blue(`${extraKeys.join(', ')}`))
   }
 
   if (missingKeys.length > 0 || emptyValueKeys.length > 0 ) { 

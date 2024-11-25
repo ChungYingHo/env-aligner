@@ -1,7 +1,7 @@
 const envAligner = require('../src/lib/index')
 
 // 預設情況下，應該會讀取當前目錄下的 .env.example 與 .env 檔案
-// envAligner()
+envAligner()
 
 // 傳一個 options false 進去
 // const test1options = {
@@ -51,12 +51,12 @@ const envAligner = require('../src/lib/index')
 // envAligner({ fileNames })
 
 // 全傳客製化參數
-const customRootDir = 'test'
-const customFileNames = {
-  schemaName: '.env.sample',
-  envName: '.env.local'
-}
-const customCheckOptions = {
-  isCheckExtra: false
-}
-envAligner({ rootDir: customRootDir, fileNames: customFileNames, checkOptions: customCheckOptions })
+// const customRootDir = 'test/test_folder/frontend'
+// const customFileNames = {
+//   schemaName: '.env.sample',
+//   envName: '.env.local'
+// }
+// const customCheckOptions = {
+//   isCheckExtra: false
+// }
+// envAligner({ rootDir: customRootDir, fileNames: customFileNames, checkOptions: customCheckOptions })

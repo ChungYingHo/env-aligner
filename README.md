@@ -24,7 +24,6 @@ envAligner()
 
 We also provide some options for you to customize the check:
 1. `rootDir`: Default is `process.cwd()`. You can specify the root directory of your project.
-    - Notice: You must provide the correct path. We discover if lost the middle folder, our error handler will not catch in this situation.
 2. `fileNames`: An object that contains the file names of what you want to check.
     - `schemaName`: The file name of the schema file. Default is `.env.example`.
     - `envName`: The file name of the environment file. Default is `.env`.
