@@ -15,7 +15,7 @@ const { defaultDir, defaultFiles } = require('../constant/default')
  * @param {string} envFileName env 檔案名稱
  */
 
-const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, isClone = false } = {}) => {
+const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, isClone = false, isStrict = false } = {}) => {
   const mergedFileNames = { ...defaultFiles, ...fileNames }
   checker.validateFileNames(mergedFileNames)
 
@@ -58,7 +58,7 @@ const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, isCl
     ])
 
     if (schemaExists && envExists) {
-      checker.checkEnvVariables(schemaFilePath, envFilePath)
+      checker.checkEnvVariables(schemaFilePath, envFilePath, isStrict)
 
       return true
     } else {
@@ -72,7 +72,7 @@ const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, isCl
   for (const item of dirContents) {
     if (item.isDirectory() && !['node_modules', 'dist'].includes(item.name)) {
       const subDirPath = path.join(rootDir, item.name)
-      const isChecked = await envAligner({ rootDir: subDirPath, fileNames })
+      const isChecked = await envAligner({ rootDir: subDirPath, fileNames, isStrict })
       if (isChecked) {
         return true
       }

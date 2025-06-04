@@ -29,7 +29,7 @@ const validateFileNames = (fileNames) => {
  * @param {string} schemaPath
  * @param {string} envPath
  */
-const checkEnvVariables = (schemaPath, envPath) => {
+const checkEnvVariables = (schemaPath, envPath, isStrict) => {
   const schemaVars = fileReader.parseEnvFile(schemaPath)
   const envVars = fileReader.parseEnvFile(envPath)
   const schemaKeys = Object.keys(schemaVars)
@@ -39,7 +39,7 @@ const checkEnvVariables = (schemaPath, envPath) => {
   const emptyValueKeys = schemaKeys.filter(
     key => schemaVars[key] && envVars[key] === '' && !missingKeys.includes(key)
   )
-  const extraKeys = envKeys.filter(key => !schemaKeys.includes(key))
+  const extraKeys = isStrict ? envKeys.filter(key => !schemaKeys.includes(key)) : []
 
   const envDir = path.dirname(envPath)
 
