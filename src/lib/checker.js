@@ -1,6 +1,8 @@
+const fs = require('fs')
 const path = require('path')
 const colorFormat = require('./colorFormat')
 const fileReader = require('./fileReader')
+const { defaultDir, defaultSchemaFileName, defaultEnvFileName } = require('../constant/default')
 
 /**
  * 這個函式會檢查 fileNames 物件是否有缺少必要的 key 或是 key 的值不是 string
@@ -71,7 +73,34 @@ const checkEnvVariables = (schemaPath, envPath) => {
   }
 }
 
+/**
+ * 從 schema 複製出 .env 檔案（如果不存在）
+ * @param {string} dirPath 資料夾路徑
+ * @param {string} schemaName schema 檔案名稱（預設 .env.example）
+ * @param {string} envName 要產出的 .env 檔名（預設 .env）
+ */
+
+const cloneSchemaToEnv = async (schemaName = defaultSchemaFileName, envName = defaultEnvFileName, dirPath = defaultDir) => {
+  const schemaPath = path.join(dirPath, schemaName)
+  const envPath = path.join(dirPath, envName)
+
+  // 檢查 schema 檔案是否存在
+  if (!(await fileReader.fileExists(schemaPath))) {
+    console.error(colorFormat.formatRedInverse(`\nSchema file ${schemaName} does not exist in ${dirPath}`))
+    process.exit(1)
+  }
+
+  // 如果 .env 檔案不存在，則複製 schema 檔案到 .env
+  if (!(await fileReader.fileExists(envPath))) {
+    await fs.promises.copyFile(schemaPath, envPath)
+    console.log(colorFormat.formatGreen(`\nCopied ${schemaName} to ${envName} in ${dirPath}`))
+  } else {
+    console.log(colorFormat.formatBlue(`\n${envName} already exists in ${dirPath}, skipping copy.`))
+  }
+}
+
 module.exports = {
   validateFileNames,
-  checkEnvVariables
+  checkEnvVariables,
+  cloneSchemaToEnv
 }

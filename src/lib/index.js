@@ -3,14 +3,7 @@ const path = require('path')
 const colorFormat = require('./colorFormat')
 const fileReader = require('./fileReader')
 const checker = require('./checker')
-
-const defaultDir = process.cwd()
-const defaultSchemaFileName = '.env.example'
-const defaultEnvFileName = '.env'
-const defaultFiles = {
-  schemaName: defaultSchemaFileName,
-  envName: defaultEnvFileName
-}
+const { defaultDir, defaultFiles } = require('../constant/default')
 
 /**
  * 主程式，遞迴檢查目錄中的 env file 和 schema 檔案
@@ -22,7 +15,7 @@ const defaultFiles = {
  * @param {string} envFileName env 檔案名稱
  */
 
-const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles } = {}) => {
+const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, isClone = false } = {}) => {
   const mergedFileNames = { ...defaultFiles, ...fileNames }
   checker.validateFileNames(mergedFileNames)
 
@@ -38,6 +31,15 @@ const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles } = {
   } catch (error) {
     console.error(colorFormat.formatRed(`[error] Failed to access ${rootDir}: ${error.message}`))
     process.exit(1)
+  }
+
+  // 若 isClone 為 true，則嘗試複製 schema 檔案到 env 檔案
+  if (isClone) {
+    const didClone = await checker.cloneSchemaToEnv(schemaFileName, envFileName, rootDir)
+    if (didClone) {
+      console.log(colorFormat.formatGreen(`✅ env file created successfully in ${rootDir}`))
+    }
+    return
   }
 
   // 讀取目錄內容
