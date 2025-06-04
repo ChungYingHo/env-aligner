@@ -1,7 +1,8 @@
 const fs = require('fs')
 const path = require('path')
-const dotenv = require('dotenv')
 const colorFormat = require('./colorFormat')
+const fileReader = require('./fileReader')
+const checker = require('./checker')
 
 const defaultDir = process.cwd()
 const defaultSchemaFileName = '.env.example'
@@ -9,111 +10,6 @@ const defaultEnvFileName = '.env'
 const defaultFiles = {
   schemaName: defaultSchemaFileName,
   envName: defaultEnvFileName
-}
-
-/**
- * 解析環境變數
- * @param {string} filePath
- * @returns 應回傳一個物件，包含了檔案中的環境變數
- */
-const parseEnvFile = (filePath) => {
-  const fileContent = fs.readFileSync(filePath, 'utf8')
-  const parsedContent = dotenv.parse(fileContent)
-
-  if (!parsedContent) {
-    console.error(colorFormat.formatRedInverse(`\nFailed to parse ${filePath}`))
-    process.exit(1)
-  }
-
-  if (!Object.keys(parsedContent).length) {
-    console.error(colorFormat.formatRedInverse(`\n${filePath} is empty or has no valid variables.`))
-    process.exit(1)
-  }
-
-  return parsedContent
-}
-
-/**
- * 這個函式會檢查 fileNames 物件是否有缺少必要的 key 或是 key 的值不是 string
- * @param {string} fileNames
- */
-const validateFileNames = (fileNames) => {
-  const requiredKeys = ['schemaName', 'envName']
-
-  requiredKeys.forEach(key => {
-    if(!(key in fileNames)) {
-      console.error(colorFormat.formatRedInverse(`\nMissing required key: ${key}`))
-      process.exit(1)
-    }
-
-    if (typeof fileNames[key] !== 'string') {
-      console.error(colorFormat.formatRedInverse(`\n${key} must be a string`))
-      process.exit(1)
-    }
-  })
-}
-
-/**
- * 會檢查 schema 檔案中的變數是否都有在 env 檔案中出現
- * @param {string} schemaPath
- * @param {string} envPath
- */
-const checkEnvVariables = (schemaPath, envPath) => {
-  const schemaVars = parseEnvFile(schemaPath)
-  const envVars = parseEnvFile(envPath)
-  const schemaKeys = Object.keys(schemaVars)
-  const envKeys = Object.keys(envVars)
-
-  const missingKeys = schemaKeys.filter(key => !envKeys.includes(key))
-  const emptyValueKeys = schemaKeys.filter(
-    key => schemaVars[key] && envVars[key] === '' && !missingKeys.includes(key)
-  )
-  const extraKeys = envKeys.filter(key => !schemaKeys.includes(key))
-
-  const envDir = path.dirname(envPath)
-
-  if (missingKeys.length > 0) {
-    console.error(colorFormat.formatRedInverse(`\n[Missing Variables] in ${envDir}`))
-    console.log(colorFormat.formatRed(`→ ${missingKeys.join(', ')}`))
-  }
-
-  if (emptyValueKeys.length > 0) {
-    console.error(colorFormat.formatYellowInverse(`\n[Empty Variables] in ${envDir}`))
-    console.log(colorFormat.formatYellow(`→ ${emptyValueKeys.join(', ')}`))
-  }
-
-  if (extraKeys.length > 0) {
-    console.error(colorFormat.formatBlueInverse(`\n[Extra Variables] in ${envDir}`))
-    console.log(colorFormat.formatBlue(`→ ${extraKeys.join(', ')}`))
-  }
-
-  if (missingKeys.length > 0 || emptyValueKeys.length > 0 ) { 
-    process.exit(1)
-  } else {
-    const msg = `
-      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-      🎉 SUCCESS! ENV CHECK PASSED 🎉
-
-      ✅ All variables in: ${envDir}
-
-      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    `
-    console.log(colorFormat.formatGreen(msg))
-  }
-}
-
-/**
- * 檢查檔案是否存在
- * @param {string} targetPath
- * @returns {Promise<boolean>} 如果檔案存在則回傳 true，否則回傳 false
- */
-async function fileExists (targetPath) {
-  try {
-    await fs.promises.access(targetPath, fs.constants.F_OK)
-    return true
-  } catch {
-    return false
-  }
 }
 
 /**
@@ -128,7 +24,7 @@ async function fileExists (targetPath) {
 
 const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles } = {}) => {
   const mergedFileNames = { ...defaultFiles, ...fileNames }
-  validateFileNames(mergedFileNames)
+  checker.validateFileNames(mergedFileNames)
 
   const { schemaName: schemaFileName, envName: envFileName } = mergedFileNames
 
@@ -155,12 +51,12 @@ const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles } = {
   // 若有 .env 檔案，執行比對並停止遞迴
   if (directoryEntries.includes(envFileName)) {
     const [schemaExists, envExists] = await Promise.all([
-      fileExists(schemaFilePath),
-      fileExists(envFilePath)
+      fileReader.fileExists(schemaFilePath),
+      fileReader.fileExists(envFilePath)
     ])
 
     if (schemaExists && envExists) {
-      checkEnvVariables(schemaFilePath, envFilePath)
+      checker.checkEnvVariables(schemaFilePath, envFilePath)
 
       return true
     } else {
