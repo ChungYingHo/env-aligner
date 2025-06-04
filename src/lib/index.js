@@ -2,40 +2,47 @@ const fs = require('fs')
 const path = require('path')
 const colorFormat = require('./colorFormat')
 const fileReader = require('./fileReader')
-const checker = require('./checker')
-const { defaultDir, defaultFiles } = require('../constant/default')
+const envHandler = require('./envHandler')
+const { defaultDir, defaultFiles, defaultMode } = require('../constant/default')
 
 /**
- * 主程式，遞迴檢查目錄中的 env file 和 schema 檔案
- * 函式使用方式：
- * envAligner(rootDir, fileNames)
- * envAligner({fileNames: customFileNamesObject})
- * @param {string} rootDir 根目錄
- * @param {string} schemaFileName schema 檔案名稱
- * @param {string} envFileName env 檔案名稱
+ * envAligner：主程式入口，用於驗證或建立各資料夾中的 .env 檔案。
+ * 
+ * 支援功能：
+ * 1. 遞迴檢查指定目錄與子目錄下的 `.env` 與 schema（預設為 `.env.example`）
+ * 2. 可啟用嚴格模式（isStrict）檢查多餘變數
+ * 3. 可啟用對齊模式（isAlign）自動修正 .env 格式
+ * 4. 可啟用複製模式（isClone）從 schema 建立 .env 檔案（若不存在）
+ * 
+ * @param {Object} options
+ * @param {string} [options.rootDir] - 根目錄路徑，預設為 process.cwd()
+ * @param {Object} [options.fileNames] - 自定義檔名（例如 `{ schemaName: '.env.example', envName: '.env' }`）
+ * @param {Object} [options.mode] - 模式控制物件 `{ isStrict?: boolean, isAlign?: boolean }`
+ * @param {boolean} [options.isClone] - 是否為複製模式，預設為 false
+ * 
+ * @returns {Promise<boolean>} - 若成功完成檢查或建立，回傳 true，否則遞迴至下一層
  */
 
-const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, isClone = false, isStrict = false, isAlign } = {}) => {
+const envAligner = async ({
+  rootDir = defaultDir,
+  fileNames = defaultFiles,
+  mode = defaultMode,
+  isClone = false
+} = {}) => {
+
   const mergedFileNames = { ...defaultFiles, ...fileNames }
-  checker.validateFileNames(mergedFileNames)
+  // 檢查檔案名稱是否正確
+  fileReader.validateFileNames(mergedFileNames)
 
   const { schemaName: schemaFileName, envName: envFileName } = mergedFileNames
+  const { isStrict, isAlign } = mode
 
   // 確保目錄存在且為資料夾
-  try {
-    const rootStats = await fs.promises.stat(rootDir)
-    if (!rootStats.isDirectory()) {
-      console.error(colorFormat.formatRed(`[error] ${rootDir} is not a directory.`))
-      process.exit(1)
-    }
-  } catch (error) {
-    console.error(colorFormat.formatRed(`[error] Failed to access ${rootDir}: ${error.message}`))
-    process.exit(1)
-  }
+  await fileReader.validateDirectory(rootDir)
 
   // 若 isClone 為 true，則嘗試複製 schema 檔案到 env 檔案
   if (isClone) {
-    const didClone = await checker.cloneSchemaToEnv(schemaFileName, envFileName, rootDir)
+    const didClone = await envHandler.cloneSchemaToEnv(schemaFileName, envFileName, rootDir)
     if (didClone) {
       console.log(colorFormat.formatGreen(`✅ env file created successfully in ${rootDir}`))
     }
@@ -58,7 +65,7 @@ const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, isCl
     ])
 
     if (schemaExists && envExists) {
-      checker.checkEnvVariables(schemaFilePath, envFilePath, isStrict, isAlign)
+      envHandler.checkEnvVariables(schemaFilePath, envFilePath, isStrict, isAlign)
 
       return true
     } else {
@@ -72,7 +79,7 @@ const envAligner = async ({ rootDir = defaultDir, fileNames = defaultFiles, isCl
   for (const item of dirContents) {
     if (item.isDirectory() && !['node_modules', 'dist'].includes(item.name)) {
       const subDirPath = path.join(rootDir, item.name)
-      const isChecked = await envAligner({ rootDir: subDirPath, fileNames, isStrict, isAlign })
+      const isChecked = await envAligner({ rootDir: subDirPath, fileNames, mode })
       if (isChecked) {
         return true
       }

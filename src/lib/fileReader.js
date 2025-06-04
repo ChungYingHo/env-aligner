@@ -38,8 +38,47 @@ async function fileExists (targetPath) {
   }
 }
 
+/**
+ * 這個函式會檢查 fileNames 物件是否有缺少必要的 key 或是 key 的值不是 string
+ * @param {string} fileNames
+ */
+const validateFileNames = (fileNames) => {
+  const requiredKeys = ['schemaName', 'envName']
+
+  requiredKeys.forEach(key => {
+    if(!(key in fileNames)) {
+      console.error(colorFormat.formatRedInverse(`\nMissing required key: ${key}`))
+      process.exit(1)
+    }
+
+    if (typeof fileNames[key] !== 'string') {
+      console.error(colorFormat.formatRedInverse(`\n${key} must be a string`))
+      process.exit(1)
+    }
+  })
+}
+
+/**
+ * 驗證指定路徑是否為有效資料夾
+ * @param {string} dirPath - 要驗證的目錄路徑
+ */
+async function validateDirectory (dirPath) {
+  try {
+    const stats = await fs.promises.stat(dirPath)
+    if (!stats.isDirectory()) {
+      console.error(colorFormat.formatRed(`[error] ${dirPath} is not a directory.`))
+      process.exit(1)
+    }
+  } catch (error) {
+    console.error(colorFormat.formatRed(`[error] Failed to access ${dirPath}: ${error.message}`))
+    process.exit(1)
+  }
+}
+
 
 module.exports = {
   parseEnvFile,
-  fileExists
+  fileExists,
+  validateFileNames,
+  validateDirectory
 }

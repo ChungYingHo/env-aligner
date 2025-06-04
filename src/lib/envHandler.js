@@ -3,36 +3,40 @@ const dotenv = require('dotenv')
 const path = require('path')
 const colorFormat = require('./colorFormat')
 const fileReader = require('./fileReader')
-const { defaultDir, defaultSchemaFileName, defaultEnvFileName } = require('../constant/default')
-
 /**
- * 這個函式會檢查 fileNames 物件是否有缺少必要的 key 或是 key 的值不是 string
- * @param {string} fileNames
+ * 從 schema 複製出 .env 檔案（如果不存在）
+ * @param {string} rootDir 資料夾路徑
+ * @param {string} schemaFileName schema 檔案名稱（預設 .env.example）
+ * @param {string} envFileName 要產出的 .env 檔名（預設 .env）
  */
-const validateFileNames = (fileNames) => {
-  const requiredKeys = ['schemaName', 'envName']
 
-  requiredKeys.forEach(key => {
-    if(!(key in fileNames)) {
-      console.error(colorFormat.formatRedInverse(`\nMissing required key: ${key}`))
-      process.exit(1)
-    }
+const cloneSchemaToEnv = async (schemaFileName, envFileName, rootDir) => {
+  const schemaFilePath = path.join(rootDir, schemaFileName)
+  const envFilePath = path.join(rootDir, envFileName)
 
-    if (typeof fileNames[key] !== 'string') {
-      console.error(colorFormat.formatRedInverse(`\n${key} must be a string`))
-      process.exit(1)
-    }
-  })
+  // 檢查 schema 檔案是否存在
+  if (!(await fileReader.fileExists(schemaFilePath))) {
+    console.error(colorFormat.formatRedInverse(`\nSchema file ${schemaFileName} does not exist in ${rootDir}`))
+    process.exit(1)
+  }
+
+  // 如果 .env 檔案不存在，則複製 schema 檔案到 .env
+  if (!(await fileReader.fileExists(envFilePath))) {
+    await fs.promises.copyFile(schemaFilePath, envFilePath)
+    console.log(colorFormat.formatGreen(`\nCopied ${schemaFileName} to ${envFileName} in ${rootDir}`))
+  } else {
+    console.log(colorFormat.formatBlue(`\n${envFileName} already exists in ${rootDir}, skipping copy.`))
+  }
 }
 
 /**
  * 根據 schema 對齊 .env 檔案的格式與變數順序
  * 支援多行變數值（例如憑證）
  */
-const alignEnvWithSchema = async (schemaPath, envPath) => {
-  const schemaRaw = fs.readFileSync(schemaPath, 'utf8')
+const alignEnvWithSchema = async (schemaFilePath, envFilePath) => {
+  const schemaRaw = fs.readFileSync(schemaFilePath, 'utf8')
   const schemaVars = dotenv.parse(schemaRaw)
-  const envVars = fileReader.parseEnvFile(envPath)
+  const envVars = fileReader.parseEnvFile(envFilePath)
 
   const outputLines = []
   const lineBuffer = schemaRaw.split(/\r?\n/)
@@ -65,19 +69,19 @@ const alignEnvWithSchema = async (schemaPath, envPath) => {
     }
   }
 
-  await fs.promises.writeFile(envPath, outputLines.join('\n'), 'utf8')
+  await fs.promises.writeFile(envFilePath, outputLines.join('\n'), 'utf8')
 
-  console.log(colorFormat.formatGreenInverse(`\nAligned ${path.basename(envPath)} with ${path.basename(schemaPath)}`))
+  console.log(colorFormat.formatGreenInverse(`\nAligned ${path.basename(envFilePath)} with ${path.basename(schemaFilePath)}`))
 }
 
 /**
  * 會檢查 schema 檔案中的變數是否都有在 env 檔案中出現
- * @param {string} schemaPath
- * @param {string} envPath
+ * @param {string} schemaFilePath
+ * @param {string} envFilePath
  */
-const checkEnvVariables = async (schemaPath, envPath, isStrict, isAlign) => {
-  const schemaVars = fileReader.parseEnvFile(schemaPath)
-  const envVars = fileReader.parseEnvFile(envPath)
+const checkEnvVariables = async (schemaFilePath, envFilePath, isStrict, isAlign) => {
+  const schemaVars = fileReader.parseEnvFile(schemaFilePath)
+  const envVars = fileReader.parseEnvFile(envFilePath)
   const schemaKeys = Object.keys(schemaVars)
   const envKeys = Object.keys(envVars)
 
@@ -87,7 +91,7 @@ const checkEnvVariables = async (schemaPath, envPath, isStrict, isAlign) => {
   )
   const extraKeys = isStrict ? envKeys.filter(key => !schemaKeys.includes(key)) : []
 
-  const envDir = path.dirname(envPath)
+  const envDir = path.dirname(envFilePath)
 
   if (missingKeys.length > 0) {
     console.error(colorFormat.formatRedInverse(`\n[Missing Variables] in ${envDir}`))
@@ -105,7 +109,7 @@ const checkEnvVariables = async (schemaPath, envPath, isStrict, isAlign) => {
   }
 
   if (isStrict && isAlign) {
-    await alignEnvWithSchema(schemaPath, envPath)
+    await alignEnvWithSchema(schemaFilePath, envFilePath)
   } else if (!isStrict && isAlign) {
     console.warn(colorFormat.formatYellowInverse(
       `\n[Warning] The "align" option can only be used in strict mode. Skipping alignment.`
@@ -127,35 +131,8 @@ const checkEnvVariables = async (schemaPath, envPath, isStrict, isAlign) => {
   }
 }
 
-/**
- * 從 schema 複製出 .env 檔案（如果不存在）
- * @param {string} dirPath 資料夾路徑
- * @param {string} schemaName schema 檔案名稱（預設 .env.example）
- * @param {string} envName 要產出的 .env 檔名（預設 .env）
- */
-
-const cloneSchemaToEnv = async (schemaName = defaultSchemaFileName, envName = defaultEnvFileName, dirPath = defaultDir) => {
-  const schemaPath = path.join(dirPath, schemaName)
-  const envPath = path.join(dirPath, envName)
-
-  // 檢查 schema 檔案是否存在
-  if (!(await fileReader.fileExists(schemaPath))) {
-    console.error(colorFormat.formatRedInverse(`\nSchema file ${schemaName} does not exist in ${dirPath}`))
-    process.exit(1)
-  }
-
-  // 如果 .env 檔案不存在，則複製 schema 檔案到 .env
-  if (!(await fileReader.fileExists(envPath))) {
-    await fs.promises.copyFile(schemaPath, envPath)
-    console.log(colorFormat.formatGreen(`\nCopied ${schemaName} to ${envName} in ${dirPath}`))
-  } else {
-    console.log(colorFormat.formatBlue(`\n${envName} already exists in ${dirPath}, skipping copy.`))
-  }
-}
-
 module.exports = {
-  validateFileNames,
-  checkEnvVariables,
   cloneSchemaToEnv,
-  alignEnvWithSchema
+  alignEnvWithSchema,
+  checkEnvVariables
 }

@@ -5,10 +5,15 @@ const defaultFiles = {
   schemaName: defaultSchemaFileName,
   envName: defaultEnvFileName
 }
+const defaultMode = {
+  isStrict: false,
+  isAlign: false
+}
 
 module.exports = {
   defaultDir,
   defaultSchemaFileName,
   defaultEnvFileName,
-  defaultFiles
+  defaultFiles,
+  defaultMode
 }
