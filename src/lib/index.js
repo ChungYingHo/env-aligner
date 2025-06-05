@@ -77,13 +77,14 @@ const envAligner = async ({
 
   // 否則遞迴檢查子目錄
   for (const item of dirContents) {
-    if (item.isDirectory() && !['node_modules', 'dist'].includes(item.name)) {
-      const subDirPath = path.join(rootDir, item.name)
-      const isChecked = await envAligner({ rootDir: subDirPath, fileNames, mode })
-      if (isChecked) {
-        return true
-      }
+    if (!item.isDirectory() || ['node_modules', 'dist'].includes(item.name)) {
+      continue
     }
+
+    const subDirPath = path.join(rootDir, item.name)
+    const isChecked = await envAligner({ rootDir: subDirPath, fileNames, mode })
+
+    if (isChecked) return true
   }
 
   return false
