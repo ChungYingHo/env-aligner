@@ -9,7 +9,7 @@
     - after: 調整為 env-aligner 在某一層如果有檢測到 .env file 有錯誤，它會檢查完該檔案後即停止往下層繼續檢查
 
 ### 新增功能
-- [ ] 新增 `--help` 支援指令 (理論上現在應該就有，但要確認一下)
+- [x] 新增 `--help` 支援指令 (理論上現在應該就有，但要確認一下)
 - [x] 新增 `env-aligner --clone schema` 與 `env-aligner -c schema` 指令，功能為從 schema (ex: .env.example) clone 一份作為 .env 放在同層路徑上。
 - [x] 新增 `env-aligner --strict`，嚴格檢查模式會進行下列檢查：
     - missing variables (非嚴格模式下也會檢查)

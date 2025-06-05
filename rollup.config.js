@@ -15,7 +15,7 @@ module.exports = [
       terser(),
       commonjs()
     ],
-    external: ['dotenv', 'chalk', 'fs', 'path']
+    external: ['dotenv', 'fs', 'path']
   },
   {
     input: 'src/bin/cli.js',
@@ -31,6 +31,6 @@ module.exports = [
       commonjs(),
       json()
     ],
-    external: ['dotenv', 'chalk', 'fs', 'path', 'commander']
+    external: ['dotenv', 'fs', 'path', 'commander']
   }
 ]
