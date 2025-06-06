@@ -1,6 +1,6 @@
 {
   "name": "env-aligner",
-  "version": "1.0.0",
+  "version": "2.0.0-beta.1",
   "description": "A developer-friendly tool for validating and aligning environment variables in .env files against schema files (e.g., .env.example). It helps identify missing variables, empty values, or extra entries, ensuring a consistent and error-free environment setup.",
   "keywords": [
     ".env",
