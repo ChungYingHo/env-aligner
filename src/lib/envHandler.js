@@ -87,7 +87,20 @@ const checkEnvVariables = async (schemaFilePath, envFilePath, isStrict, isAlign)
 
   const missingKeys = schemaKeys.filter(key => !envKeys.includes(key))
   const emptyValueKeys = schemaKeys.filter(
-    key => schemaVars[key] && envVars[key] === '' && !missingKeys.includes(key)
+    key => {
+      if (!envKeys.includes(key) || missingKeys.includes(key)) return false
+
+      const rawValue = envVars[key]
+      if (typeof rawValue !== 'string') return false
+
+      // 移除註解（只處理沒引號的值）
+      const isQuoted = rawValue.startsWith('"') || rawValue.startsWith("'")
+      const valueWithoutComment = !isQuoted
+        ? rawValue.split('#')[0].trim()
+        : rawValue.trim()
+
+      return valueWithoutComment === ''
+    }
   )
   const extraKeys = isStrict ? envKeys.filter(key => !schemaKeys.includes(key)) : []
 
