@@ -1,79 +1,85 @@
 # Env Aligner
-This is simple tool to check if the environment variables in `.env` file are aligned with the `.env.example` file.  
-In the two situations below, the tool will give you a warning and exit with code 1:
-1. **Missing variables**: The `.env` file is missing some variables that are in the `.env.example` file.
-2. **Missing Values**: The `.env` file has some variables that are missing values but the `.env.example` file has values for them.
 
-And below situation will only give you a warning:
-1. **Extra variables**: The `.env` file has some variables that are not in the `.env.example` file.
+**Env Aligner** is a lightweight CLI tool that helps you validate and align environment variables between `.env` and `.env.example` files.  
+It checks for missing keys, empty values, and extra variables, and optionally formats `.env` files to match the schema.
 
-## How to use
-All you need to do first is to install the package:
-```bash
+> Here's what `env-aligner` output looks like:  
+![Example](./assets/shortcut.png)
+
+
+## Installation
+
+```
 npm install env-aligner
 ```
 
-### Use in your code
-The simplest way to use this package is to call the function `envAligner()` without any parameters.
-The package will check the `.env` file and `.env.example` file as default.
-```javascript
+
+## Features
+
+Env Aligner recursively searches your project directories and provides the following features:
+
+1. **Missing Key**: Detects keys defined in the schema file (e.g., `.env.example`) but missing from the `.env` file.
+2. **Missing Value**: Detects variables that exist in `.env` but have no assigned value.
+3. **Extra Key**: Detects keys in `.env` that are not defined in the schema file. This is only checked in **strict mode**.
+4. **Align**: Automatically aligns the order and structure of the `.env` file based on the schema. This feature requires **strict mode** to be enabled.
+5. **Clone**: Creates a new `.env` file based on the schema file if none exists.
+
+
+## Usage
+### CLI Options
+
+| Option        | Description                                                                 | Default           |
+|---------------|-----------------------------------------------------------------------------|-------------------|
+| `--dir`       | Root directory to scan.                                                     | `process.cwd()`   |
+| `--schema`    | Schema file name (usually `.env.example`).                                 | `.env.example`    |
+| `--env`       | Env file name to validate or align.                                         | `.env`            |
+| `--strict`    | Enable strict mode: warns about extra keys in `.env` not in the schema.     |     Not enabled (unless flag is present)       |
+| `--align`     | Enable align mode: auto-fix `.env` format based on schema. ⚠️ Only works with `--strict`. |      Not enabled (unless flag is present)     |
+| `--clone`     | Clone schema to env file if env does not exist in the folder.               |    Not enabled (unless flag is present)        |
+
+> Examples:
+```
+npx env-aligner
+npx env-aligner --dir .devcontainer --schema config.example --env config.env
+npx env-aligner --clone
+npx env-aligner --strict --align
+```
+
+---
+
+### Programmatic Usage (Optional)
+Although Env Aligner is primarily designed for use via the CLI, it also supports programmatic usage in JavaScript environments.
+
+> ⚠️ Note: Programmatic usage is only supported in CommonJS (require) environments.  
+> If your project uses "type": "module" (ESM), consider using the CLI instead.
+
+```js title="check-env.cjs"
 const envAligner = require('env-aligner')
 
-envAligner()
+envAligner({
+  rootDir: string, // Root directory to scan (default: process.cwd())
+  fileNames: {
+    schemaName: string, // Schema file name (e.g., '.env.example')
+    envName: string     // Env file name to validate (e.g., '.env')
+  },
+  mode: {
+    isStrict: boolean,  // Enable strict mode (extra key detection)
+    isAlign: boolean    // Enable align mode (auto format fix)
+  },
+  isClone: boolean       // Whether to generate the env file if missing
+})
 ```
 
-We also provide some options for you to customize the check:
-1. `rootDir`: Default is `process.cwd()`. You can specify the root directory of your project.
-2. `fileNames`: An object that contains the file names of what you want to check.
-    - `schemaName`: The file name of the schema file. Default is `.env.example`.
-    - `envName`: The file name of the environment file. Default is `.env`.
-3. `checkOptions`: An object that contains the options of what you want to check.
-    - `isCheckMissing`: Check the missing variables. Default is `true`.
-    - `isCheckEmptyValue`: Check the missing values. Default is `true`.
-    - `isCheckExtra`: Check the extra variables. Default is `true`.
 
-```javascript
-const customRootDir = '/application/frontend'
-const customFileNames = {
-  schemaName: '.env.sample',
-  envName: '.env.local'
-}
-const customCheckOptions = {
-  isCheckExtra: false
-}
+## Changelog
+See [CHANGELOG.md](./CHANGELOG.md) for full version history.
 
 
-envAligner({ rootDir: customRootDir, fileNames: customFileNames, checkOptions: customCheckOptions })
 
-// or you can only pass a parameter by this way
-envAligner({fileNames: fileNames})
-```
+## License
 
-### Use in terminal
-We also provide a command line tool for you to use.  
-The check will use the default `.env` and `.env.example` files.
-```bash
-npx env-aligner
-```
+MIT © 2025 Jeremy Ho & MJC
 
-Also, you can use some options to customize the check:
+---
 
-| Option | Description | Default |
-| --- | --- | --- |
-| -s, --schema | The file name of the schema file | `.env.example` |
-| -e, --env | The file name of the environment file | `.env` |
-| -m, --missing | Check the missing variables | `true` |
-| -n, --empty | Check the missing values | `true` |
-| -x, --extra | Check the extra variables | `true` |
-
-```bash
-# Check the specified .env.sample and .env.local
-npx env-aligner -s .env.sample -e .env.local
-
-# Check the specified .env.example and default .env
-npx env-aligner -s .env.example 
-
-# Do not check missing, empty value, and extra
-npx env-aligner -m false -n false -x false
-```
-
+Got suggestions or questions? Open an issue or drop us a message — we’d love to hear from you!
