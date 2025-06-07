@@ -61,21 +61,6 @@ const envAligner = async ({
   const isEnvExplicit = fileNames.envName !== defaultFiles.envName
   const isSchemaExplicit = fileNames.schemaName !== defaultFiles.schemaName
 
-  // 如果使用者明確指定，但根本連檔案名都不存在，印錯誤並結束
-  if (!directoryEntries.includes(envFileName) && isEnvExplicit) {
-    console.error(colorFormat.formatRed(
-      `\n❌ Env file not found in ${rootDir}: ${envFileName}`
-    ))
-    process.exit(1)
-  }
-
-  if (!directoryEntries.includes(schemaFileName) && isSchemaExplicit) {
-    console.error(colorFormat.formatRed(
-      `\n❌ Schema file not found in ${rootDir}: ${schemaFileName}`
-    ))
-    process.exit(1)
-  }
-
   // 若有 .env 檔案，執行比對並停止遞迴
   if (directoryEntries.includes(envFileName)) {
     const [schemaExists, envExists] = await Promise.all([
@@ -104,6 +89,14 @@ const envAligner = async ({
     const isChecked = await envAligner({ rootDir: subDirPath, fileNames, mode })
 
     if (isChecked) return true
+  }
+
+  // 若完全沒找到符合條件的檔案
+  if (isEnvExplicit || isSchemaExplicit) {
+    console.error(colorFormat.formatRed(
+      `\n❌ No matching env/schema file found for "${envFileName}" or "${schemaFileName}" under: ${rootDir}`
+    ))
+    process.exit(1)
   }
 
   return false
