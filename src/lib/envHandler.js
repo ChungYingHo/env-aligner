@@ -93,15 +93,20 @@ const checkEnvVariables = async (schemaFilePath, envFilePath, isStrict, isAlign)
       const rawValue = envVars[key]
       if (typeof rawValue !== 'string') return false
 
-      // 移除註解（只處理沒引號的值）
       const isQuoted = rawValue.startsWith('"') || rawValue.startsWith("'")
+      const trimmed = rawValue.trim()
+
+      // 明確填了 "" 或 ''，視為「有填值」，不算 empty
+      if (trimmed === '""' || trimmed === "''") return false
+
       const valueWithoutComment = !isQuoted
-        ? rawValue.split('#')[0].trim()
-        : rawValue.trim()
+        ? trimmed.split('#')[0].trim()
+        : trimmed
 
       return valueWithoutComment === ''
     }
   )
+
   const extraKeys = isStrict ? envKeys.filter(key => !schemaKeys.includes(key)) : []
 
   const envDir = path.dirname(envFilePath)
