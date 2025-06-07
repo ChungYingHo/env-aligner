@@ -85,6 +85,16 @@ const checkEnvVariables = async (schemaFilePath, envFilePath, isStrict, isAlign)
   const schemaKeys = Object.keys(schemaVars)
   const envKeys = Object.keys(envVars)
 
+  const envRawLines = fs.readFileSync(envFilePath, 'utf-8').split('\n')
+  const envRawMap = {}
+  for (const line of envRawLines) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#') || !trimmed.includes('=')) continue
+    const [key, ...rest] = trimmed.split('=')
+    const value = rest.join('=').trim()
+    envRawMap[key.trim()] = value
+  }
+
   const missingKeys = schemaKeys.filter(key => !envKeys.includes(key))
   const emptyValueKeys = schemaKeys.filter(
     key => {
@@ -93,11 +103,12 @@ const checkEnvVariables = async (schemaFilePath, envFilePath, isStrict, isAlign)
       const rawValue = envVars[key]
       if (typeof rawValue !== 'string') return false
 
+      // 用原始 map 判斷是否填了 '' 或 ""
+      const rawString = envRawMap[key] ?? ''
+      if (rawString === "''" || rawString === '""') return false
+
       const isQuoted = rawValue.startsWith('"') || rawValue.startsWith("'")
       const trimmed = rawValue.trim()
-
-      // 若實際值為空字串，且 example 明寫的是 '' 或 ""，就視為有填
-      if (rawValue === '' && (schemaVars[key] === "''" || schemaVars[key] === '""')) return false
 
       const valueWithoutComment = !isQuoted
         ? trimmed.split('#')[0].trim()
@@ -106,7 +117,6 @@ const checkEnvVariables = async (schemaFilePath, envFilePath, isStrict, isAlign)
       return valueWithoutComment === ''
     }
   )
-
 
   const extraKeys = isStrict ? envKeys.filter(key => !schemaKeys.includes(key)) : []
 
