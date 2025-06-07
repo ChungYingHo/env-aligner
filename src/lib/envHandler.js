@@ -96,8 +96,8 @@ const checkEnvVariables = async (schemaFilePath, envFilePath, isStrict, isAlign)
       const isQuoted = rawValue.startsWith('"') || rawValue.startsWith("'")
       const trimmed = rawValue.trim()
 
-      // 明確填了 "" 或 ''，視為「有填值」，不算 empty
-      if (trimmed === '""' || trimmed === "''") return false
+      // 若實際值為空字串，且 example 明寫的是 '' 或 ""，就視為有填
+      if (rawValue === '' && (schemaVars[key] === "''" || schemaVars[key] === '""')) return false
 
       const valueWithoutComment = !isQuoted
         ? trimmed.split('#')[0].trim()
@@ -106,6 +106,7 @@ const checkEnvVariables = async (schemaFilePath, envFilePath, isStrict, isAlign)
       return valueWithoutComment === ''
     }
   )
+
 
   const extraKeys = isStrict ? envKeys.filter(key => !schemaKeys.includes(key)) : []
 
