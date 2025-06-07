@@ -36,42 +36,82 @@ const cloneSchemaToEnv = async (schemaFileName, envFileName, rootDir) => {
 const alignEnvWithSchema = async (schemaFilePath, envFilePath) => {
   const schemaRaw = fs.readFileSync(schemaFilePath, 'utf8')
   const schemaVars = dotenv.parse(schemaRaw)
-  const envVars = fileReader.parseEnvFile(envFilePath)
 
+  // 解析 env 並保留 ""、'' 判斷
+  const envRawLines = fs.readFileSync(envFilePath, 'utf-8').split('\n')
+  const envRawMap = {}
+  let currentKey = null
+  let buffer = []
+
+  for (const line of envRawLines) {
+    const trimmed = line.trim()
+
+    if (!trimmed || trimmed.startsWith('#')) continue
+
+    const equalIndex = trimmed.indexOf('=')
+    const hasNewAssignment = equalIndex > 0 && trimmed[equalIndex - 1] !== '\\'
+
+    if (hasNewAssignment) {
+      if (currentKey) {
+        envRawMap[currentKey] = buffer.join('\n')
+        buffer = []
+      }
+
+      const key = trimmed.slice(0, equalIndex).trim()
+      const value = trimmed.slice(equalIndex + 1)
+      currentKey = key
+      buffer.push(value)
+    } else if (currentKey) {
+      buffer.push(trimmed)
+    }
+  }
+
+  if (currentKey) {
+    envRawMap[currentKey] = buffer.join('\n')
+  }
+
+  // 開始對齊
   const outputLines = []
-  const lineBuffer = schemaRaw.split(/\r?\n/)
+  const schemaLines = schemaRaw.split(/\r?\n/)
 
-  for (let i = 0; i < lineBuffer.length; i++) {
-    const line = lineBuffer[i].trim()
+  for (const originalLine of schemaLines) {
+    const trimmed = originalLine.trim()
 
-    // 空行
-    if (line === '') {
+    if (trimmed === '') {
       outputLines.push('')
       continue
     }
 
-    // 註解
-    if (line.startsWith('#')) {
-      outputLines.push(lineBuffer[i])
+    if (trimmed.startsWith('#')) {
+      outputLines.push(originalLine)
       continue
     }
 
-    // 判斷是不是新的變數宣告
-    const equalIndex = line.indexOf('=')
+    const equalIndex = trimmed.indexOf('=')
     if (equalIndex !== -1) {
-      const key = line.slice(0, equalIndex).trim()
+      const key = trimmed.slice(0, equalIndex).trim()
 
       if (key in schemaVars) {
-        const value = envVars[key] ?? ''
-        const quoted = value.includes('\n') ? `"${value}"` : value
-        outputLines.push(`${key}=${quoted}`)
+        let value = envRawMap[key] ?? ''
+        const needsQuote = value.includes('\n')
+
+        if (needsQuote && !(value.startsWith('"') || value.startsWith("'"))) {
+          console.log(colorFormat.formatYellow(`ℹ️  Variable "${key}" has multi-line value. Automatically quoting to preserve it.`))
+          value = `"${value}"`
+        }
+
+        outputLines.push(`${key}=${value}`)
       }
     }
   }
 
   await fs.promises.writeFile(envFilePath, outputLines.join('\n'), 'utf8')
 
-  console.log(colorFormat.formatGreenInverse(`\nAligned ${path.basename(envFilePath)} with ${path.basename(schemaFilePath)}`))
+  console.log(
+    colorFormat.formatGreenInverse(
+      `\nAligned ${path.basename(envFilePath)} with ${path.basename(schemaFilePath)}`
+    )
+  )
 }
 
 /**
@@ -140,12 +180,12 @@ const checkEnvVariables = async (schemaFilePath, envFilePath, isStrict, isAlign)
   if (isStrict && isAlign) {
     await alignEnvWithSchema(schemaFilePath, envFilePath)
   } else if (!isStrict && isAlign) {
-    console.warn(colorFormat.formatYellowInverse(
+    console.log(colorFormat.formatYellow(
       `\n[Warning] The "align" option can only be used in strict mode. Skipping alignment.`
     ))
   }
 
-  if (missingKeys.length > 0 || emptyValueKeys.length > 0 ) { 
+  if (missingKeys.length > 0 || emptyValueKeys.length > 0 ) {
     process.exit(1)
   } else {
     const msg = `
