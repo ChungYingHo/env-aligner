@@ -1,7 +1,7 @@
 {
   "name": "env-aligner",
-  "version": "2.0.0-beta.7",
-  "description": "A developer-friendly tool for validating and aligning environment variables in .env files against schema files (e.g., .env.example). It helps identify missing variables, empty values, or extra entries, ensuring a consistent and error-free environment setup.",
+  "version": "2.0.0",
+  "description": "Validate, align, and clone env files (e.g. .env) using a schema file (e.g. .env.example).",
   "keywords": [
     ".env",
     ".env.example",
@@ -19,7 +19,7 @@
     "url": "https://github.com/ChungYingHo/env-aligner.git"
   },
   "contributors": [
-    "Jeremy Ho <ag.cyho@gmail.com>(https://codefictionist.com/)",
+    "Jeremy Ho <ag.cyho@gmail.com>(https://jeremyho.tw/)",
     "MJC <5iftisland@gmail.com>(https://github.com/JuiCheng)"
   ],
   "license": "MIT",
