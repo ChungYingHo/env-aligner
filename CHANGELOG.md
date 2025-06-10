@@ -1,4 +1,4 @@
-## [v2.0.0] (2025-06-09)
+## [v2.0.0](https://github.com/ChungYingHo/env-aligner/compare/v1.0.0...v2.0.0) (2025-06-09)
 
 ### Bug Fixes
 1. In v1.0.0, a bug caused keys with empty values in both the schema and the env file to be treated as valid, when they should have been reported as missing values.
