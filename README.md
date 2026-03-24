@@ -75,11 +75,11 @@ npx env-aligner init --schema .env.production.example
 
 ## Exit Codes
 
-| Code | 意義 |
-|------|------|
-| `0` | 成功（check 通過 / init 完成 / fix 完成） |
-| `1` | check 失敗（有 missing 或 empty 變數） |
-| `2` | Fatal error（檔案不存在、寫入失敗等） |
+| Code | Meaning |
+|------|---------|
+| `0` | Success (check passed / init done / fix done) |
+| `1` | Check failed (missing or empty variables found) |
+| `2` | Fatal error (file not found, write failure, etc.) |
 
 ## Changelog
 
@@ -87,4 +87,4 @@ See [CHANGELOG.md](./CHANGELOG.md) for full version history.
 
 ## License
 
-MIT © 2025 Jeremy Ho & MJC
+MIT © 2025 Jeremy Ho

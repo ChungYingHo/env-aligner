@@ -16,20 +16,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ChungYingHo/env-aligner.git"
+    "url": "https://github.com/ChungYingHo/env-aligner.git"
   },
-  "contributors": [
-    {
-      "name": "Jeremy Ho",
-      "email": "ag.cyho@gmail.com",
-      "url": "https://jeremyho.tw/"
-    },
-    {
-      "name": "MJC",
-      "email": "5iftisland@gmail.com",
-      "url": "https://github.com/JuiCheng"
-    }
-  ],
+  "author": {
+    "name": "Jeremy Ho",
+    "email": "ag.cyho@gmail.com",
+    "url": "https://jeremyho.tw/"
+  },
   "license": "MIT",
   "type": "module",
   "bin": {

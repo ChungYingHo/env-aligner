@@ -14,7 +14,7 @@
 ### Technical Migration
 1. Rewritten in TypeScript with ESM modules.
 2. Build tool: Rollup → tsup (esbuild).
-3. Test framework: manual test script → vitest (15 tests).
+3. Test framework: manual test script → vitest (30 tests).
 4. Color output: hand-written ANSI codes → picocolors.
 5. Architecture: three-layer separation (CLI → Core → Utils). Core functions are pure — no `process.exit()` or `console.log`.
 
