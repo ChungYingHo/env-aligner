@@ -55,6 +55,24 @@ describe('fixEnv', () => {
     expect(keys.indexOf('DB_HOST')).toBeLessThan(keys.indexOf('API_KEY'))
   })
 
+  it('preserves CRLF line endings from schema', async () => {
+    const crlfDir = path.join(__dirname, 'fixtures', 'crlf')
+    const crlfSchema = path.join(crlfDir, '.env.example')
+    const crlfTmp = path.join(crlfDir, '.env.tmp')
+    await fs.copyFile(path.join(crlfDir, '.env'), crlfTmp)
+    try {
+      const result = fixEnv(crlfSchema, crlfTmp)
+      expect(result.added).toContain('APP_PORT')
+      const content = await fs.readFile(crlfTmp, 'utf8')
+      expect(content).toContain('\r\n')
+      // Verify no bare \n (all newlines should be \r\n)
+      const withoutCRLF = content.replace(/\r\n/g, '')
+      expect(withoutCRLF).not.toContain('\n')
+    } finally {
+      try { await fs.unlink(crlfTmp) } catch {}
+    }
+  })
+
   it('returns reordered=false when env already matches schema order', async () => {
     const syncedDir = path.join(__dirname, 'fixtures', 'synced')
     const syncedSchema = path.join(syncedDir, '.env.example')

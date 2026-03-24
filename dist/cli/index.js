@@ -334,15 +334,27 @@ async function fixCommand(opts) {
 var require2 = createRequire(import.meta.url);
 var { version } = require2("../../package.json");
 var SHARED_OPTIONS = [
-  ["--dir <directory>", "Root directory to scan", process.cwd()],
-  ["--schema <file>", "Schema file name", ".env.example"],
-  ["--env <file>", "Env file name", ".env"]
+  { flag: "--dir <directory>", description: "Root directory to scan", defaultValue: process.cwd() },
+  { flag: "--schema <file>", description: "Schema file name", defaultValue: ".env.example" },
+  { flag: "--env <file>", description: "Env file name", defaultValue: ".env" }
 ];
+function applySharedOptions(cmd) {
+  for (const { flag, description, defaultValue } of SHARED_OPTIONS) {
+    cmd.option(flag, description, defaultValue);
+  }
+  return cmd;
+}
 program.name("env-aligner").description("A CLI tool to initialize, check, and fix .env files against a schema.").version(version, "-v, --version").showSuggestionAfterError();
-program.command("init").description("Create .env from schema (.env.example). Skips if .env already exists.").option(SHARED_OPTIONS[0][0], SHARED_OPTIONS[0][1], SHARED_OPTIONS[0][2]).option(SHARED_OPTIONS[1][0], SHARED_OPTIONS[1][1], SHARED_OPTIONS[1][2]).option(SHARED_OPTIONS[2][0], SHARED_OPTIONS[2][1], SHARED_OPTIONS[2][2]).action(initCommand);
-program.command("check", { isDefault: true }).description("Check .env against schema and report missing, empty, or extra variables. (default command)").option(SHARED_OPTIONS[0][0], SHARED_OPTIONS[0][1], SHARED_OPTIONS[0][2]).option(SHARED_OPTIONS[1][0], SHARED_OPTIONS[1][1], SHARED_OPTIONS[1][2]).option(SHARED_OPTIONS[2][0], SHARED_OPTIONS[2][1], SHARED_OPTIONS[2][2]).addHelpText("after", `
+applySharedOptions(
+  program.command("init").description("Create .env from schema (.env.example). Skips if .env already exists.")
+).action(initCommand);
+applySharedOptions(
+  program.command("check", { isDefault: true }).description("Check .env against schema and report missing, empty, or extra variables. (default command)")
+).addHelpText("after", `
   Tip: Add to package.json to run before dev:
     "predev": "env-aligner check"
   `).action(checkCommand);
-program.command("fix").description("Auto-fix .env: add missing keys (with # TODO), remove extra keys, align order to schema.").option(SHARED_OPTIONS[0][0], SHARED_OPTIONS[0][1], SHARED_OPTIONS[0][2]).option(SHARED_OPTIONS[1][0], SHARED_OPTIONS[1][1], SHARED_OPTIONS[1][2]).option(SHARED_OPTIONS[2][0], SHARED_OPTIONS[2][1], SHARED_OPTIONS[2][2]).action(fixCommand);
+applySharedOptions(
+  program.command("fix").description("Auto-fix .env: add missing keys (with # TODO), remove extra keys, align order to schema.")
+).action(fixCommand);
 program.parse(process.argv);

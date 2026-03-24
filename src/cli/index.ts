@@ -8,10 +8,17 @@ const require = createRequire(import.meta.url)
 const { version } = require('../../package.json')
 
 const SHARED_OPTIONS = [
-  ['--dir <directory>', 'Root directory to scan', process.cwd()],
-  ['--schema <file>', 'Schema file name', '.env.example'],
-  ['--env <file>', 'Env file name', '.env']
-] as const
+  { flag: '--dir <directory>', description: 'Root directory to scan', defaultValue: process.cwd() },
+  { flag: '--schema <file>', description: 'Schema file name', defaultValue: '.env.example' },
+  { flag: '--env <file>', description: 'Env file name', defaultValue: '.env' }
+]
+
+function applySharedOptions(cmd: import('commander').Command) {
+  for (const { flag, description, defaultValue } of SHARED_OPTIONS) {
+    cmd.option(flag, description, defaultValue)
+  }
+  return cmd
+}
 
 program
   .name('env-aligner')
@@ -20,34 +27,28 @@ program
   .showSuggestionAfterError()
 
 // ── init ──────────────────────────────────────────────────────────────────────
-program
-  .command('init')
-  .description('Create .env from schema (.env.example). Skips if .env already exists.')
-  .option(SHARED_OPTIONS[0][0], SHARED_OPTIONS[0][1], SHARED_OPTIONS[0][2])
-  .option(SHARED_OPTIONS[1][0], SHARED_OPTIONS[1][1], SHARED_OPTIONS[1][2])
-  .option(SHARED_OPTIONS[2][0], SHARED_OPTIONS[2][1], SHARED_OPTIONS[2][2])
-  .action(initCommand)
+applySharedOptions(
+  program
+    .command('init')
+    .description('Create .env from schema (.env.example). Skips if .env already exists.')
+).action(initCommand)
 
 // ── check ─────────────────────────────────────────────────────────────────────
-program
-  .command('check', { isDefault: true })
-  .description('Check .env against schema and report missing, empty, or extra variables. (default command)')
-  .option(SHARED_OPTIONS[0][0], SHARED_OPTIONS[0][1], SHARED_OPTIONS[0][2])
-  .option(SHARED_OPTIONS[1][0], SHARED_OPTIONS[1][1], SHARED_OPTIONS[1][2])
-  .option(SHARED_OPTIONS[2][0], SHARED_OPTIONS[2][1], SHARED_OPTIONS[2][2])
-  .addHelpText('after', `
+applySharedOptions(
+  program
+    .command('check', { isDefault: true })
+    .description('Check .env against schema and report missing, empty, or extra variables. (default command)')
+).addHelpText('after', `
   Tip: Add to package.json to run before dev:
     "predev": "env-aligner check"
   `)
   .action(checkCommand)
 
 // ── fix ───────────────────────────────────────────────────────────────────────
-program
-  .command('fix')
-  .description('Auto-fix .env: add missing keys (with # TODO), remove extra keys, align order to schema.')
-  .option(SHARED_OPTIONS[0][0], SHARED_OPTIONS[0][1], SHARED_OPTIONS[0][2])
-  .option(SHARED_OPTIONS[1][0], SHARED_OPTIONS[1][1], SHARED_OPTIONS[1][2])
-  .option(SHARED_OPTIONS[2][0], SHARED_OPTIONS[2][1], SHARED_OPTIONS[2][2])
-  .action(fixCommand)
+applySharedOptions(
+  program
+    .command('fix')
+    .description('Auto-fix .env: add missing keys (with # TODO), remove extra keys, align order to schema.')
+).action(fixCommand)
 
 program.parse(process.argv)

@@ -68,6 +68,18 @@ describe('checkEnv', () => {
     expect(result.empty).not.toContain('API_URL')
   })
 
+  it('treats empty schema as passed with all env keys as extra', () => {
+    const result = checkEnv(
+      fixture('empty-schema', '.env.example'),
+      fixture('empty-schema', '.env')
+    )
+    expect(result.passed).toBe(true)
+    expect(result.missing).toHaveLength(0)
+    expect(result.empty).toHaveLength(0)
+    expect(result.extra).toContain('EXTRA_KEY')
+    expect(result.extra).toContain('ANOTHER_KEY')
+  })
+
   it('detects space-only values as empty', () => {
     const result = checkEnv(
       fixture('edge-cases', '.env.example'),
