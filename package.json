@@ -1,14 +1,14 @@
 {
   "name": "env-aligner",
-  "version": "2.0.0",
-  "description": "Validate, align, and clone env files (e.g. .env) using a schema file (e.g. .env.example).",
+  "version": "3.0.0",
+  "description": "A CLI tool to initialize, check, and fix .env files against a schema (e.g. .env.example).",
   "keywords": [
     ".env",
     ".env.example",
-    "dotenv",
     "environment variables",
     "check",
-    "align"
+    "init",
+    "fix"
   ],
   "homepage": "https://github.com/ChungYingHo/env-aligner",
   "bugs": {
@@ -31,14 +31,15 @@
     }
   ],
   "license": "MIT",
-  "main": "dist/index.min.js",
+  "type": "module",
   "bin": {
-    "env-aligner": "dist/cli.min.js"
+    "env-aligner": "dist/cli/index.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "rollup -c -w",
-    "build": "rmdir /s /q dist && rollup -c"
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "commander": "^12.1.0",
@@ -46,21 +47,18 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
-    "@rollup/plugin-commonjs": "^28.0.1",
-    "@rollup/plugin-json": "^6.1.0",
+    "@types/node": "^22.0.0",
     "eslint": "^9.15.0",
     "globals": "^15.12.0",
-    "rollup": "^2.79.2",
-    "rollup-plugin-terser": "^7.0.2"
+    "picocolors": "^1.1.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   },
   "files": [
     "dist"
   ],
   "engines": {
     "node": ">=18.0.0"
-  },
-  "directories": {
-    "test": "test"
-  },
-  "author": ""
+  }
 }
