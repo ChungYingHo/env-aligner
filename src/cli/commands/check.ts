@@ -19,29 +19,29 @@ export async function checkCommand(opts: CheckOptions): Promise<void> {
   }
   if (!(await fileExists(envPath))) {
     logger.error(`❌ Env file not found: ${envPath}`)
-    logger.info(`   Run "env-aligner init" to create it.`)
+    logger.info('   Run "env-aligner init" to create it.')
     process.exit(2)
   }
 
   const result = checkEnv(schemaPath, envPath)
 
   if (result.missing.length > 0) {
-    logger.label.error(` [Missing Variables] `)
+    logger.label.error(' [Missing Variables] ')
     logger.error(`→ ${result.missing.join(', ')}`)
   }
 
   if (result.empty.length > 0) {
-    logger.label.warn(` [Empty Variables] `)
+    logger.label.warn(' [Empty Variables] ')
     logger.warn(`→ ${result.empty.join(', ')}`)
   }
 
   if (result.extra.length > 0) {
-    logger.label.info(` [Extra Variables] `)
+    logger.label.info(' [Extra Variables] ')
     logger.info(`→ ${result.extra.join(', ')}`)
   }
 
   if (!result.passed) {
-    logger.error(`\n❌ Check failed. Run "env-aligner fix" to auto-fix.`)
+    logger.error('\n❌ Check failed. Run "env-aligner fix" to auto-fix.')
     process.exit(1)
   }
 

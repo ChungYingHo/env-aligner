@@ -166,16 +166,17 @@ async function fileExists(targetPath) {
 
 // src/utils/logger.ts
 var import_picocolors = __toESM(require_picocolors(), 1);
+var print = (msg) => process.stdout.write(msg + "\n");
 var logger = {
-  success: (msg) => console.log(import_picocolors.default.green(msg)),
-  info: (msg) => console.log(import_picocolors.default.blue(msg)),
+  success: (msg) => print(import_picocolors.default.green(msg)),
+  info: (msg) => print(import_picocolors.default.blue(msg)),
   warn: (msg) => console.warn(import_picocolors.default.yellow(msg)),
   error: (msg) => console.error(import_picocolors.default.red(msg)),
   label: {
     error: (msg) => console.error(import_picocolors.default.bgRed(import_picocolors.default.white(msg))),
     warn: (msg) => console.warn(import_picocolors.default.bgYellow(import_picocolors.default.white(msg))),
-    info: (msg) => console.log(import_picocolors.default.bgBlue(import_picocolors.default.white(msg))),
-    success: (msg) => console.log(import_picocolors.default.bgGreen(import_picocolors.default.white(msg)))
+    info: (msg) => print(import_picocolors.default.bgBlue(import_picocolors.default.white(msg))),
+    success: (msg) => print(import_picocolors.default.bgGreen(import_picocolors.default.white(msg)))
   }
 };
 
@@ -189,25 +190,24 @@ async function checkCommand(opts) {
   }
   if (!await fileExists(envPath)) {
     logger.error(`\u274C Env file not found: ${envPath}`);
-    logger.info(`   Run "env-aligner init" to create it.`);
+    logger.info('   Run "env-aligner init" to create it.');
     process.exit(2);
   }
   const result = checkEnv(schemaPath, envPath);
   if (result.missing.length > 0) {
-    logger.label.error(` [Missing Variables] `);
+    logger.label.error(" [Missing Variables] ");
     logger.error(`\u2192 ${result.missing.join(", ")}`);
   }
   if (result.empty.length > 0) {
-    logger.label.warn(` [Empty Variables] `);
+    logger.label.warn(" [Empty Variables] ");
     logger.warn(`\u2192 ${result.empty.join(", ")}`);
   }
   if (result.extra.length > 0) {
-    logger.label.info(` [Extra Variables] `);
+    logger.label.info(" [Extra Variables] ");
     logger.info(`\u2192 ${result.extra.join(", ")}`);
   }
   if (!result.passed) {
-    logger.error(`
-\u274C Check failed. Run "env-aligner fix" to auto-fix.`);
+    logger.error('\n\u274C Check failed. Run "env-aligner fix" to auto-fix.');
     process.exit(1);
   }
   logger.success(`
@@ -302,18 +302,18 @@ async function fixCommand(opts) {
   }
   if (!await fileExists(envPath)) {
     logger.error(`\u274C Env file not found: ${envPath}`);
-    logger.info(`   Run "env-aligner init" to create it.`);
+    logger.info('   Run "env-aligner init" to create it.');
     process.exit(2);
   }
   try {
     const result = fixEnv(schemaPath, envPath);
     if (result.added.length > 0) {
-      logger.label.warn(` [Added Keys] `);
+      logger.label.warn(" [Added Keys] ");
       logger.warn(`\u2192 ${result.added.join(", ")}`);
-      logger.warn(`  (marked with # TODO \u2014 please fill in actual values)`);
+      logger.warn("  (marked with # TODO \u2014 please fill in actual values)");
     }
     if (result.removed.length > 0) {
-      logger.label.info(` [Removed Keys] `);
+      logger.label.info(" [Removed Keys] ");
       logger.info(`\u2192 ${result.removed.join(", ")}`);
     }
     const hasChanges = result.added.length > 0 || result.removed.length > 0 || result.reordered;

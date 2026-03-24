@@ -19,7 +19,7 @@ export async function fixCommand(opts: FixOptions): Promise<void> {
   }
   if (!(await fileExists(envPath))) {
     logger.error(`❌ Env file not found: ${envPath}`)
-    logger.info(`   Run "env-aligner init" to create it.`)
+    logger.info('   Run "env-aligner init" to create it.')
     process.exit(2)
   }
 
@@ -27,13 +27,13 @@ export async function fixCommand(opts: FixOptions): Promise<void> {
     const result = fixEnv(schemaPath, envPath)
 
     if (result.added.length > 0) {
-      logger.label.warn(` [Added Keys] `)
+      logger.label.warn(' [Added Keys] ')
       logger.warn(`→ ${result.added.join(', ')}`)
-      logger.warn(`  (marked with # TODO — please fill in actual values)`)
+      logger.warn('  (marked with # TODO — please fill in actual values)')
     }
 
     if (result.removed.length > 0) {
-      logger.label.info(` [Removed Keys] `)
+      logger.label.info(' [Removed Keys] ')
       logger.info(`→ ${result.removed.join(', ')}`)
     }
 
