@@ -15,7 +15,7 @@ export function parseEnvFile(filePath: string): Record<string, string> {
  * 用於判斷是否真正留空（`''` 或 `""`）
  */
 export function parseEnvRaw(filePath: string): Record<string, string> {
-  const lines = readFileSync(filePath, 'utf8').split('\n')
+  const lines = readFileSync(filePath, 'utf8').split(/\r?\n/)
   const result: Record<string, string> = {}
 
   for (const line of lines) {

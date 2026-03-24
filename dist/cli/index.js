@@ -113,7 +113,7 @@ function parseEnvFile(filePath) {
   return parse(content);
 }
 function parseEnvRaw(filePath) {
-  const lines = readFileSync(filePath, "utf8").split("\n");
+  const lines = readFileSync(filePath, "utf8").split(/\r?\n/);
   const result = {};
   for (const line of lines) {
     const trimmed = line.trim();

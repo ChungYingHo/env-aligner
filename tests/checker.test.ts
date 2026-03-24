@@ -56,4 +56,24 @@ describe('checkEnv', () => {
     // DB_PASSWORD='' should be considered valid (intentionally empty)
     expect(result.empty).not.toContain('DB_PASSWORD')
   })
+
+  it('does not treat values with inline comments as empty', () => {
+    const result = checkEnv(
+      fixture('edge-cases', '.env.example'),
+      fixture('edge-cases', '.env')
+    )
+    // COMMENT_VAL=real-value # this is a comment → value is "real-value", not empty
+    expect(result.empty).not.toContain('COMMENT_VAL')
+    // API_URL=https://api.example.com#v2 → value contains #, not empty
+    expect(result.empty).not.toContain('API_URL')
+  })
+
+  it('detects space-only values as empty', () => {
+    const result = checkEnv(
+      fixture('edge-cases', '.env.example'),
+      fixture('edge-cases', '.env')
+    )
+    // SPACE_VAL= (empty after trim) → should be detected as empty
+    expect(result.empty).toContain('SPACE_VAL')
+  })
 })

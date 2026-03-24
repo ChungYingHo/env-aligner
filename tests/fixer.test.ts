@@ -54,4 +54,19 @@ describe('fixEnv', () => {
     expect(keys.indexOf('APP_NAME')).toBeLessThan(keys.indexOf('DB_HOST'))
     expect(keys.indexOf('DB_HOST')).toBeLessThan(keys.indexOf('API_KEY'))
   })
+
+  it('returns reordered=false when env already matches schema order', async () => {
+    const syncedDir = path.join(__dirname, 'fixtures', 'synced')
+    const syncedSchema = path.join(syncedDir, '.env.example')
+    const syncedTmp = path.join(syncedDir, '.env.tmp')
+    await fs.copyFile(path.join(syncedDir, '.env'), syncedTmp)
+    try {
+      const result = fixEnv(syncedSchema, syncedTmp)
+      expect(result.added).toHaveLength(0)
+      expect(result.removed).toHaveLength(0)
+      expect(result.reordered).toBe(false)
+    } finally {
+      try { await fs.unlink(syncedTmp) } catch {}
+    }
+  })
 })
