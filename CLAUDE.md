@@ -4,51 +4,65 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-env-aligner is a Node.js CLI tool and library that validates and aligns `.env` files against schema files (e.g., `.env.example`). It recursively searches directories, detects missing/empty/extra keys, can auto-align `.env` format to match the schema, and can clone schema files to create new `.env` files.
+env-aligner is a Node.js CLI tool that validates and fixes `.env` files against a schema file (e.g., `.env.example`). It provides three focused commands: `init`, `check`, and `fix`.
 
 ## Commands
 
-- **Build:** `npm run build` (deletes `dist/` then runs rollup)
+- **Build:** `npm run build` (tsup)
 - **Dev (watch mode):** `npm run dev`
-- **Lint:** `npx eslint .`
-- **Run manually:** `node test/test.js` (runs envAligner with strict+align against cwd)
-
-There is no test framework configured — `npm test` just exits with an error.
+- **Test:** `npm test` (vitest)
+- **Lint:** `npx eslint src/`
 
 ## Architecture
 
-The project uses CommonJS throughout (no ESM). Rollup bundles two entry points into `dist/`:
+Three-layer architecture: **CLI → Core → Utils**. TypeScript + ESM throughout.
 
-- **`src/bin/cli.js`** → `dist/cli.min.js` — CLI entry point using Commander. Parses `--dir`, `--schema`, `--env`, `--strict`, `--align`, `--clone` options and calls the library.
-- **`src/lib/index.js`** → `dist/index.min.js` — Library entry point (programmatic API). Exported as `module.exports = envAligner`. Recursively walks directories, skipping `node_modules` and `dist`.
+### CLI Layer (`src/cli/`)
 
-### Core modules (`src/lib/`)
+- **`index.ts`** — Commander entry point. Registers three subcommands with shared options (`--dir`, `--schema`, `--env`).
+- **`commands/init.ts`** — Creates `.env` from schema; skips if already exists.
+- **`commands/check.ts`** — Reports missing / empty / extra keys. Default command.
+- **`commands/fix.ts`** — Adds missing keys (with `# TODO`), removes extra keys, aligns order to schema.
 
-- **`envHandler.js`** — Core logic: `checkEnvVariables` (compare schema vs env, report missing/empty/extra keys), `alignEnvWithSchema` (rewrite .env to match schema order, handles multiline values), `cloneSchemaToEnv` (copy schema to env if missing).
-- **`fileReader.js`** — File utilities: `parseEnvFile` (uses `dotenv.parse`), `fileExists`, `validateFileNames`, `validateDirectory`.
-- **`colorFormat.js`** — ANSI color helpers (no dependencies). Functions: `formatRed`, `formatRedInverse`, `formatYellow`, `formatYellowInverse`, `formatBlue`, `formatBlueInverse`, `formatGreen`, `formatGreenInverse`.
+### Core Layer (`src/core/`)
 
-### Constants (`src/constant/default.js`)
+Pure functions — no `process.exit()`, no `console.log`. Return typed result objects.
 
-Default config values: root dir (`process.cwd()`), schema name (`.env.example`), env name (`.env`), mode flags.
+- **`parser.ts`** — `parseEnvFile()` (dotenv-based) and `parseEnvRaw()` (preserves raw values including quotes).
+- **`checker.ts`** — `checkEnv()` → `CheckResult` (missing / empty / extra / passed).
+- **`cloner.ts`** — `cloneEnv()` → copies schema to .env if not exists.
+- **`fixer.ts`** — `fixEnv()` → `FixResult` (added / removed / reordered). Rebuilds .env following schema line structure.
+
+### Utils Layer (`src/utils/`)
+
+- **`logger.ts`** — picocolors-based colored output (success/info/warn/error + label variants).
+- **`fs.ts`** — `fileExists()` async helper.
+
+### Types (`src/types.ts`)
+
+- `CheckResult` — `{ missing, empty, extra, passed }`
+- `FixResult` — `{ added, removed, reordered }`
+
+### Exit Codes
+
+- `0` — success
+- `1` — check failed (missing or empty variables)
+- `2` — fatal error (file not found)
+
+## Build & Dependencies
+
+- **Build tool:** tsup (esbuild), single entry `src/cli/index.ts` → `dist/cli/index.js`
+- **Runtime deps:** commander, dotenv, picocolors
+- **Dev deps:** typescript, tsup, vitest, eslint-config-jeremy
+- **Target:** Node 18+, ESM
 
 ## Code Style
 
-Enforced via ESLint (`eslint.config.mjs`):
+Enforced via `eslint-config-jeremy` (`eslint.config.js`):
 - 2-space indentation
 - No semicolons
-- No trailing commas
-- Space before function parentheses
-- Spaces inside curly braces
-
-Comments in the codebase are written in Traditional Chinese (繁體中文).
-
-## Key Behaviors
-
-- `--align` only works when `--strict` is also enabled; the CLI warns and ignores it otherwise.
-- `process.exit(1)` is called on missing/empty variables or fatal errors — not exceptions.
-- The recursive directory walk stops at the first directory containing a matching env file.
-- Dependencies `dotenv` and `commander` are runtime; `rollup`, `eslint` are dev-only.
+- Single quotes
+- Comments in Traditional Chinese (繁體中文)
 
 ## Workflow Rules
 

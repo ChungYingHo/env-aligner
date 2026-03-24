@@ -130,21 +130,19 @@ function parseEnvRaw(filePath) {
 // src/core/checker.ts
 function checkEnv(schemaPath, envPath) {
   const schemaVars = parseEnvFile(schemaPath);
-  const envVars = parseEnvFile(envPath);
   const envRaw = parseEnvRaw(envPath);
   const schemaKeys = Object.keys(schemaVars);
-  const envKeys = Object.keys(envVars);
-  const missing = schemaKeys.filter((key) => !envKeys.includes(key));
+  const envKeys = Object.keys(envRaw);
+  const missing = schemaKeys.filter((key) => !(key in envRaw));
   const empty = schemaKeys.filter((key) => {
-    if (!envKeys.includes(key)) return false;
-    const rawValue = envRaw[key] ?? "";
+    if (!(key in envRaw)) return false;
+    const rawValue = envRaw[key];
     if (rawValue === "''" || rawValue === '""') return false;
-    const parsed = envVars[key];
-    const isQuoted = parsed.startsWith('"') || parsed.startsWith("'");
-    const valueWithoutComment = !isQuoted ? parsed.split("#")[0].trim() : parsed.trim();
-    return valueWithoutComment === "";
+    const isQuoted = rawValue.startsWith('"') || rawValue.startsWith("'");
+    const effective = isQuoted ? rawValue : rawValue.split("#")[0].trim();
+    return effective === "";
   });
-  const extra = envKeys.filter((key) => !schemaKeys.includes(key));
+  const extra = envKeys.filter((key) => !(key in schemaVars));
   return {
     missing,
     empty,
@@ -286,9 +284,10 @@ function fixEnv(schemaPath, envPath) {
       added.push(key);
     }
   }
-  const originalEnvKeys = envKeys;
-  const reordered = added.length > 0 || removed.length > 0 || !schemaKeys.every((k, i) => originalEnvKeys[i] === k);
-  writeFileSync(envPath, outputLines.join("\n"), "utf8");
+  const outputKeys = outputLines.filter((l) => l.includes("=") && !l.trimStart().startsWith("#")).map((l) => l.split("=")[0].trim());
+  const reordered = outputKeys.length !== envKeys.length || !envKeys.every((k, i) => outputKeys[i] === k);
+  const eol = schemaRaw.includes("\r\n") ? "\r\n" : "\n";
+  writeFileSync(envPath, outputLines.join(eol), "utf8");
   return { added, removed, reordered };
 }
 

@@ -1,3 +1,25 @@
+## [v3.0.0](https://github.com/ChungYingHo/env-aligner/compare/v2.0.0...v3.0.0) (2026-03-24)
+
+### Breaking Changes
+1. Replaced flag-based CLI (`--strict`, `--align`, `--clone`) with three focused subcommands: `init`, `check`, `fix`.
+2. Removed programmatic API — env-aligner is now CLI-only.
+3. Removed recursive directory scanning — use `--dir` to specify the target directory.
+4. Extra keys are now always reported (previously required `--strict`).
+
+### New Features
+1. `env-aligner init` — Creates `.env` from schema file; skips if already exists.
+2. `env-aligner check` — Reports missing, empty, and extra variables. Default command when no subcommand is given.
+3. `env-aligner fix` — Adds missing keys (with `# TODO` marker), removes extra keys, and reorders to match schema.
+
+### Technical Migration
+1. Rewritten in TypeScript with ESM modules.
+2. Build tool: Rollup → tsup (esbuild).
+3. Test framework: manual test script → vitest (15 tests).
+4. Color output: hand-written ANSI codes → picocolors.
+5. Architecture: three-layer separation (CLI → Core → Utils). Core functions are pure — no `process.exit()` or `console.log`.
+
+---
+
 ## [v2.0.0](https://github.com/ChungYingHo/env-aligner/compare/v1.0.0...v2.0.0) (2025-06-09)
 
 ### Bug Fixes
@@ -12,4 +34,4 @@
 1. We added the `--clone` option, which allows users to generate an `.env` file based on the schema file.
 2. We added the `--strict` option, which enables checking for extra keys in the `.env` file.
 3. We added the `--align` option, which helps align the keys between the schema and `.env` file. It removes unnecessary keys and comments from the `.env` file while preserving existing values.
-    - ⚠️ This option only works when used together with `--strict`.
+    - This option only works when used together with `--strict`.

@@ -7,32 +7,28 @@ import { parseEnvFile, parseEnvRaw } from './parser.js'
  */
 export function checkEnv(schemaPath: string, envPath: string): CheckResult {
   const schemaVars = parseEnvFile(schemaPath)
-  const envVars = parseEnvFile(envPath)
   const envRaw = parseEnvRaw(envPath)
 
   const schemaKeys = Object.keys(schemaVars)
-  const envKeys = Object.keys(envVars)
+  const envKeys = Object.keys(envRaw)
 
-  const missing = schemaKeys.filter(key => !envKeys.includes(key))
+  const missing = schemaKeys.filter(key => !(key in envRaw))
 
   const empty = schemaKeys.filter(key => {
-    if (!envKeys.includes(key)) return false
+    if (!(key in envRaw)) return false
 
-    const rawValue = envRaw[key] ?? ''
+    const rawValue = envRaw[key]
     // 明確設為 '' 或 "" 視為有意留空，不算 empty
     if (rawValue === "''" || rawValue === '""') return false
 
-    const parsed = envVars[key]
-    // 去掉行內 comment 後若為空字串，視為 empty
-    const isQuoted = parsed.startsWith('"') || parsed.startsWith("'")
-    const valueWithoutComment = !isQuoted
-      ? parsed.split('#')[0].trim()
-      : parsed.trim()
+    // 引號包裹的值不做 inline comment 分割（引號內的 # 是值的一部分）
+    const isQuoted = rawValue.startsWith('"') || rawValue.startsWith("'")
+    const effective = isQuoted ? rawValue : rawValue.split('#')[0].trim()
 
-    return valueWithoutComment === ''
+    return effective === ''
   })
 
-  const extra = envKeys.filter(key => !schemaKeys.includes(key))
+  const extra = envKeys.filter(key => !(key in schemaVars))
 
   return {
     missing,

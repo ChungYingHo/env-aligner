@@ -52,13 +52,16 @@ export function fixEnv(schemaPath: string, envPath: string): FixResult {
     }
   }
 
-  const originalEnvKeys = envKeys
-  const reordered =
-    added.length > 0 ||
-    removed.length > 0 ||
-    !schemaKeys.every((k, i) => originalEnvKeys[i] === k)
+  // 比較修復前後的 key 順序是否有變化
+  const outputKeys = outputLines
+    .filter(l => l.includes('=') && !l.trimStart().startsWith('#'))
+    .map(l => l.split('=')[0].trim())
+  const reordered = outputKeys.length !== envKeys.length
+    || !envKeys.every((k, i) => outputKeys[i] === k)
 
-  writeFileSync(envPath, outputLines.join('\n'), 'utf8')
+  // 保留原始檔案的換行符風格
+  const eol = schemaRaw.includes('\r\n') ? '\r\n' : '\n'
+  writeFileSync(envPath, outputLines.join(eol), 'utf8')
 
   return { added, removed, reordered }
 }

@@ -3,9 +3,9 @@
 node_modules/
 
 
-# 忽略所有路徑的 .env 文件，但是不忽略 test 文件夾下的 .env 文件
-!test/
-!test/*.env
-!test/*.env.local
-!test/**/*.env
-!test/**/*.env.local
+# 忽略所有路徑的 .env 文件，但是不忽略 tests 文件夾下的 .env 文件
+!tests/
+!tests/*.env
+!tests/*.env.local
+!tests/**/*.env
+!tests/**/*.env.local
