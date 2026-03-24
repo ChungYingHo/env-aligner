@@ -99,15 +99,13 @@ describe('CLI integration', () => {
     const tmpDir = path.join(__dirname, 'fixtures', '_tmp-fix')
 
     afterEach(() => {
-      const { rmSync } = require('fs')
       if (existsSync(tmpDir)) rmSync(tmpDir, { recursive: true })
     })
 
     it('adds missing keys and reports changes', () => {
-      const { mkdirSync, copyFileSync: cp } = require('fs')
       mkdirSync(tmpDir, { recursive: true })
-      cp(path.join(fixture('missing-keys'), '.env.example'), path.join(tmpDir, '.env.example'))
-      cp(path.join(fixture('missing-keys'), '.env'), path.join(tmpDir, '.env'))
+      copyFileSync(path.join(fixture('missing-keys'), '.env.example'), path.join(tmpDir, '.env.example'))
+      copyFileSync(path.join(fixture('missing-keys'), '.env'), path.join(tmpDir, '.env'))
 
       const result = run(['fix', '--dir', tmpDir])
       expect(result.code).toBe(0)
@@ -115,10 +113,9 @@ describe('CLI integration', () => {
     })
 
     it('reports no changes when already synced', () => {
-      const { mkdirSync, copyFileSync: cp } = require('fs')
       mkdirSync(tmpDir, { recursive: true })
-      cp(path.join(fixture('synced'), '.env.example'), path.join(tmpDir, '.env.example'))
-      cp(path.join(fixture('synced'), '.env'), path.join(tmpDir, '.env'))
+      copyFileSync(path.join(fixture('synced'), '.env.example'), path.join(tmpDir, '.env.example'))
+      copyFileSync(path.join(fixture('synced'), '.env'), path.join(tmpDir, '.env'))
 
       const result = run(['fix', '--dir', tmpDir])
       expect(result.code).toBe(0)
