@@ -73,6 +73,14 @@ npx env-aligner check --dir ./apps/web --schema .env.local.example --env .env.lo
 npx env-aligner init --schema .env.production.example
 ```
 
+## Exit Codes
+
+| Code | 意義 |
+|------|------|
+| `0` | 成功（check 通過 / init 完成 / fix 完成） |
+| `1` | check 失敗（有 missing 或 empty 變數） |
+| `2` | Fatal error（檔案不存在、寫入失敗等） |
+
 ## Changelog
 
 See [CHANGELOG.md](./CHANGELOG.md) for full version history.

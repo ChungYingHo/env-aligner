@@ -164,17 +164,18 @@ async function fileExists(targetPath) {
 
 // src/utils/logger.ts
 var import_picocolors = __toESM(require_picocolors(), 1);
-var print = (msg) => process.stdout.write(msg + "\n");
+var stdout = (msg) => process.stdout.write(msg + "\n");
+var stderr = (msg) => process.stderr.write(msg + "\n");
 var logger = {
-  success: (msg) => print(import_picocolors.default.green(msg)),
-  info: (msg) => print(import_picocolors.default.blue(msg)),
-  warn: (msg) => console.warn(import_picocolors.default.yellow(msg)),
-  error: (msg) => console.error(import_picocolors.default.red(msg)),
+  success: (msg) => stdout(import_picocolors.default.green(msg)),
+  info: (msg) => stdout(import_picocolors.default.blue(msg)),
+  warn: (msg) => stderr(import_picocolors.default.yellow(msg)),
+  error: (msg) => stderr(import_picocolors.default.red(msg)),
   label: {
-    error: (msg) => console.error(import_picocolors.default.bgRed(import_picocolors.default.white(msg))),
-    warn: (msg) => console.warn(import_picocolors.default.bgYellow(import_picocolors.default.white(msg))),
-    info: (msg) => print(import_picocolors.default.bgBlue(import_picocolors.default.white(msg))),
-    success: (msg) => print(import_picocolors.default.bgGreen(import_picocolors.default.white(msg)))
+    error: (msg) => stderr(import_picocolors.default.bgRed(import_picocolors.default.white(msg))),
+    warn: (msg) => stderr(import_picocolors.default.bgYellow(import_picocolors.default.white(msg))),
+    info: (msg) => stdout(import_picocolors.default.bgBlue(import_picocolors.default.white(msg))),
+    success: (msg) => stdout(import_picocolors.default.bgGreen(import_picocolors.default.white(msg)))
   }
 };
 
@@ -337,7 +338,7 @@ var SHARED_OPTIONS = [
   ["--schema <file>", "Schema file name", ".env.example"],
   ["--env <file>", "Env file name", ".env"]
 ];
-program.name("env-aligner").description("A CLI tool to initialize, check, and fix .env files against a schema.").version(version, "-v", "--version").showSuggestionAfterError();
+program.name("env-aligner").description("A CLI tool to initialize, check, and fix .env files against a schema.").version(version, "-v, --version").showSuggestionAfterError();
 program.command("init").description("Create .env from schema (.env.example). Skips if .env already exists.").option(SHARED_OPTIONS[0][0], SHARED_OPTIONS[0][1], SHARED_OPTIONS[0][2]).option(SHARED_OPTIONS[1][0], SHARED_OPTIONS[1][1], SHARED_OPTIONS[1][2]).option(SHARED_OPTIONS[2][0], SHARED_OPTIONS[2][1], SHARED_OPTIONS[2][2]).action(initCommand);
 program.command("check", { isDefault: true }).description("Check .env against schema and report missing, empty, or extra variables. (default command)").option(SHARED_OPTIONS[0][0], SHARED_OPTIONS[0][1], SHARED_OPTIONS[0][2]).option(SHARED_OPTIONS[1][0], SHARED_OPTIONS[1][1], SHARED_OPTIONS[1][2]).option(SHARED_OPTIONS[2][0], SHARED_OPTIONS[2][1], SHARED_OPTIONS[2][2]).addHelpText("after", `
   Tip: Add to package.json to run before dev:
