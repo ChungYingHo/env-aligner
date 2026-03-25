@@ -1,6 +1,6 @@
 {
   "name": "env-aligner",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "A CLI tool to initialize, check, and fix .env files against a schema (e.g. .env.example).",
   "keywords": [
     ".env",

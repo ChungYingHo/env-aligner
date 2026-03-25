@@ -1,9 +1,17 @@
+## [v3.1.0](https://github.com/ChungYingHo/env-aligner/compare/v3.0.0...v3.1.0) (2026-03-25)
+
+### Changes
+1. Removed `--dir`, `--schema`, `--env` shared options. CLI now always operates on the current working directory with `.env.example` and `.env`.
+2. Simplified CLI interface — just `cd` into your project and run `env-aligner`.
+
+---
+
 ## [v3.0.0](https://github.com/ChungYingHo/env-aligner/compare/v2.0.0...v3.0.0) (2026-03-24)
 
 ### Breaking Changes
 1. Replaced flag-based CLI (`--strict`, `--align`, `--clone`) with three focused subcommands: `init`, `check`, `fix`.
 2. Removed programmatic API — env-aligner is now CLI-only.
-3. Removed recursive directory scanning — use `--dir` to specify the target directory.
+3. Removed recursive directory scanning.
 4. Extra keys are now always reported (previously required `--strict`).
 
 ### New Features
