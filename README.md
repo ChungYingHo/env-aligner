@@ -59,20 +59,6 @@ Automatically fixes `.env`:
 2. **Removes** extra keys not defined in the schema
 3. **Reorders** keys to match the schema's order (for easier visual comparison)
 
-### Shared Options
-
-| Option | Description | Default |
-|---|---|---|
-| `--dir <directory>` | Root directory to scan | `process.cwd()` |
-| `--schema <file>` | Schema file name | `.env.example` |
-| `--env <file>` | Env file name | `.env` |
-
-```bash
-# Examples with custom paths
-npx env-aligner check --dir ./apps/web --schema .env.local.example --env .env.local
-npx env-aligner init --schema .env.production.example
-```
-
 ## Exit Codes
 
 | Code | Meaning |

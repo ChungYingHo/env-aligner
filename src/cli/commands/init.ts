@@ -2,22 +2,20 @@ import path from 'path'
 import { cloneEnv } from '../../core/cloner.js'
 import { logger } from '../../utils/logger.js'
 
-interface InitOptions {
-  dir: string
-  schema: string
-  env: string
-}
+const SCHEMA = '.env.example'
+const ENV = '.env'
 
-export async function initCommand(opts: InitOptions): Promise<void> {
-  const schemaPath = path.join(opts.dir, opts.schema)
-  const envPath = path.join(opts.dir, opts.env)
+export async function initCommand(): Promise<void> {
+  const cwd = process.cwd()
+  const schemaPath = path.join(cwd, SCHEMA)
+  const envPath = path.join(cwd, ENV)
 
   try {
     const created = await cloneEnv(schemaPath, envPath)
     if (created) {
-      logger.success(`✅ Created ${opts.env} from ${opts.schema} in ${opts.dir}`)
+      logger.success(`✅ Created ${ENV} from ${SCHEMA}`)
     } else {
-      logger.info(`ℹ️  ${opts.env} already exists in ${opts.dir}, skipping.`)
+      logger.info(`ℹ️  ${ENV} already exists, skipping.`)
     }
   } catch (err) {
     logger.error(`❌ ${(err as Error).message}`)

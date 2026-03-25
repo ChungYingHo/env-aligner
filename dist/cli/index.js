@@ -180,9 +180,12 @@ var logger = {
 };
 
 // src/cli/commands/check.ts
-async function checkCommand(opts) {
-  const schemaPath = path.join(opts.dir, opts.schema);
-  const envPath = path.join(opts.dir, opts.env);
+var SCHEMA = ".env.example";
+var ENV = ".env";
+async function checkCommand() {
+  const cwd = process.cwd();
+  const schemaPath = path.join(cwd, SCHEMA);
+  const envPath = path.join(cwd, ENV);
   if (!await fileExists(schemaPath)) {
     logger.error(`\u274C Schema file not found: ${schemaPath}`);
     process.exit(2);
@@ -213,8 +216,7 @@ async function checkCommand(opts) {
 \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 \u{1F389} SUCCESS! ENV CHECK PASSED
 
-\u2705 All required variables are present in:
-   ${opts.dir}
+\u2705 All required variables are present.
 \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501`);
 }
 
@@ -235,15 +237,18 @@ async function cloneEnv(schemaPath, envPath) {
 }
 
 // src/cli/commands/init.ts
-async function initCommand(opts) {
-  const schemaPath = path2.join(opts.dir, opts.schema);
-  const envPath = path2.join(opts.dir, opts.env);
+var SCHEMA2 = ".env.example";
+var ENV2 = ".env";
+async function initCommand() {
+  const cwd = process.cwd();
+  const schemaPath = path2.join(cwd, SCHEMA2);
+  const envPath = path2.join(cwd, ENV2);
   try {
     const created = await cloneEnv(schemaPath, envPath);
     if (created) {
-      logger.success(`\u2705 Created ${opts.env} from ${opts.schema} in ${opts.dir}`);
+      logger.success(`\u2705 Created ${ENV2} from ${SCHEMA2}`);
     } else {
-      logger.info(`\u2139\uFE0F  ${opts.env} already exists in ${opts.dir}, skipping.`);
+      logger.info(`\u2139\uFE0F  ${ENV2} already exists, skipping.`);
     }
   } catch (err) {
     logger.error(`\u274C ${err.message}`);
@@ -293,9 +298,12 @@ function fixEnv(schemaPath, envPath) {
 }
 
 // src/cli/commands/fix.ts
-async function fixCommand(opts) {
-  const schemaPath = path3.join(opts.dir, opts.schema);
-  const envPath = path3.join(opts.dir, opts.env);
+var SCHEMA3 = ".env.example";
+var ENV3 = ".env";
+async function fixCommand() {
+  const cwd = process.cwd();
+  const schemaPath = path3.join(cwd, SCHEMA3);
+  const envPath = path3.join(cwd, ENV3);
   if (!await fileExists(schemaPath)) {
     logger.error(`\u274C Schema file not found: ${schemaPath}`);
     process.exit(2);
@@ -319,10 +327,10 @@ async function fixCommand(opts) {
     const hasChanges = result.added.length > 0 || result.removed.length > 0 || result.reordered;
     if (hasChanges) {
       logger.success(`
-\u2705 ${opts.env} has been fixed and aligned with ${opts.schema}`);
+\u2705 ${ENV3} has been fixed and aligned with ${SCHEMA3}`);
     } else {
       logger.success(`
-\u2705 ${opts.env} is already in sync with ${opts.schema} \u2014 no changes needed.`);
+\u2705 ${ENV3} is already in sync with ${SCHEMA3} \u2014 no changes needed.`);
     }
   } catch (err) {
     logger.error(`\u274C ${err.message}`);
@@ -333,28 +341,11 @@ async function fixCommand(opts) {
 // src/cli/index.ts
 var require2 = createRequire(import.meta.url);
 var { version } = require2("../../package.json");
-var SHARED_OPTIONS = [
-  { flag: "--dir <directory>", description: "Root directory to scan", defaultValue: process.cwd() },
-  { flag: "--schema <file>", description: "Schema file name", defaultValue: ".env.example" },
-  { flag: "--env <file>", description: "Env file name", defaultValue: ".env" }
-];
-function applySharedOptions(cmd) {
-  for (const { flag, description, defaultValue } of SHARED_OPTIONS) {
-    cmd.option(flag, description, defaultValue);
-  }
-  return cmd;
-}
 program.name("env-aligner").description("A CLI tool to initialize, check, and fix .env files against a schema.").version(version, "-v, --version").showSuggestionAfterError();
-applySharedOptions(
-  program.command("init").description("Create .env from schema (.env.example). Skips if .env already exists.")
-).action(initCommand);
-applySharedOptions(
-  program.command("check", { isDefault: true }).description("Check .env against schema and report missing, empty, or extra variables. (default command)")
-).addHelpText("after", `
+program.command("init").description("Create .env from schema (.env.example). Skips if .env already exists.").action(initCommand);
+program.command("check", { isDefault: true }).description("Check .env against schema and report missing, empty, or extra variables. (default command)").addHelpText("after", `
   Tip: Add to package.json to run before dev:
     "predev": "env-aligner check"
   `).action(checkCommand);
-applySharedOptions(
-  program.command("fix").description("Auto-fix .env: add missing keys (with # TODO), remove extra keys, align order to schema.")
-).action(fixCommand);
+program.command("fix").description("Auto-fix .env: add missing keys (with # TODO), remove extra keys, align order to schema.").action(fixCommand);
 program.parse(process.argv);

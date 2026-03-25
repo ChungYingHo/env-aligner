@@ -3,15 +3,13 @@ import { fixEnv } from '../../core/fixer.js'
 import { fileExists } from '../../utils/fs.js'
 import { logger } from '../../utils/logger.js'
 
-interface FixOptions {
-  dir: string
-  schema: string
-  env: string
-}
+const SCHEMA = '.env.example'
+const ENV = '.env'
 
-export async function fixCommand(opts: FixOptions): Promise<void> {
-  const schemaPath = path.join(opts.dir, opts.schema)
-  const envPath = path.join(opts.dir, opts.env)
+export async function fixCommand(): Promise<void> {
+  const cwd = process.cwd()
+  const schemaPath = path.join(cwd, SCHEMA)
+  const envPath = path.join(cwd, ENV)
 
   if (!(await fileExists(schemaPath))) {
     logger.error(`❌ Schema file not found: ${schemaPath}`)
@@ -40,9 +38,9 @@ export async function fixCommand(opts: FixOptions): Promise<void> {
     const hasChanges = result.added.length > 0 || result.removed.length > 0 || result.reordered
 
     if (hasChanges) {
-      logger.success(`\n✅ ${opts.env} has been fixed and aligned with ${opts.schema}`)
+      logger.success(`\n✅ ${ENV} has been fixed and aligned with ${SCHEMA}`)
     } else {
-      logger.success(`\n✅ ${opts.env} is already in sync with ${opts.schema} — no changes needed.`)
+      logger.success(`\n✅ ${ENV} is already in sync with ${SCHEMA} — no changes needed.`)
     }
   } catch (err) {
     logger.error(`❌ ${(err as Error).message}`)

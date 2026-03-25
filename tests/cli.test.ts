@@ -8,10 +8,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const CLI = path.join(__dirname, '..', 'dist', 'cli', 'index.js')
 const fixture = (dir: string) => path.join(__dirname, 'fixtures', dir)
 
-function run(args: string[]): { code: number; stdout: string; stderr: string } {
+function run(args: string[], cwd?: string): { code: number; stdout: string; stderr: string } {
   try {
     const stdout = execFileSync('node', [CLI, ...args], {
       encoding: 'utf8',
+      cwd,
       stdio: ['pipe', 'pipe', 'pipe']
     })
     return { code: 0, stdout, stderr: '' }
@@ -28,25 +29,32 @@ describe('CLI integration', () => {
 
   describe('check', () => {
     it('exits 0 when env is in sync', () => {
-      const result = run(['check', '--dir', fixture('basic')])
+      const result = run(['check'], fixture('basic'))
       expect(result.code).toBe(0)
       expect(result.stdout).toContain('SUCCESS')
     })
 
     it('exits 1 when missing keys found', () => {
-      const result = run(['check', '--dir', fixture('missing-keys')])
+      const result = run(['check'], fixture('missing-keys'))
       expect(result.code).toBe(1)
       expect(result.stderr).toContain('Missing')
     })
 
     it('exits 2 when schema file not found', () => {
-      const result = run(['check', '--dir', fixture('basic'), '--schema', 'nonexistent'])
-      expect(result.code).toBe(2)
-      expect(result.stderr).toContain('not found')
+      const tmpDir = path.join(__dirname, 'fixtures', '_tmp-no-schema')
+      mkdirSync(tmpDir, { recursive: true })
+      writeFileSync(path.join(tmpDir, '.env'), 'KEY=value\n')
+      try {
+        const result = run(['check'], tmpDir)
+        expect(result.code).toBe(2)
+        expect(result.stderr).toContain('not found')
+      } finally {
+        rmSync(tmpDir, { recursive: true })
+      }
     })
 
     it('runs as default command (no subcommand)', () => {
-      const result = run(['--dir', fixture('basic')])
+      const result = run([], fixture('basic'))
       expect(result.code).toBe(0)
       expect(result.stdout).toContain('SUCCESS')
     })
@@ -70,7 +78,7 @@ describe('CLI integration', () => {
         path.join(tmpDir, '.env.example')
       )
 
-      const result = run(['init', '--dir', tmpDir])
+      const result = run(['init'], tmpDir)
       expect(result.code).toBe(0)
       expect(result.stdout).toContain('Created')
       expect(existsSync(path.join(tmpDir, '.env'))).toBe(true)
@@ -83,13 +91,13 @@ describe('CLI integration', () => {
       )
       writeFileSync(path.join(tmpDir, '.env'), 'EXISTING=true\n')
 
-      const result = run(['init', '--dir', tmpDir])
+      const result = run(['init'], tmpDir)
       expect(result.code).toBe(0)
       expect(result.stdout).toContain('already exists')
     })
 
     it('exits 2 when schema not found', () => {
-      const result = run(['init', '--dir', tmpDir])
+      const result = run(['init'], tmpDir)
       expect(result.code).toBe(2)
       expect(result.stderr).toContain('Schema file not found')
     })
@@ -107,7 +115,7 @@ describe('CLI integration', () => {
       copyFileSync(path.join(fixture('missing-keys'), '.env.example'), path.join(tmpDir, '.env.example'))
       copyFileSync(path.join(fixture('missing-keys'), '.env'), path.join(tmpDir, '.env'))
 
-      const result = run(['fix', '--dir', tmpDir])
+      const result = run(['fix'], tmpDir)
       expect(result.code).toBe(0)
       expect(result.stdout).toContain('fixed')
     })
@@ -117,7 +125,7 @@ describe('CLI integration', () => {
       copyFileSync(path.join(fixture('synced'), '.env.example'), path.join(tmpDir, '.env.example'))
       copyFileSync(path.join(fixture('synced'), '.env'), path.join(tmpDir, '.env'))
 
-      const result = run(['fix', '--dir', tmpDir])
+      const result = run(['fix'], tmpDir)
       expect(result.code).toBe(0)
       expect(result.stdout).toContain('no changes')
     })

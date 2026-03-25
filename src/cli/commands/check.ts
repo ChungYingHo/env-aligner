@@ -3,15 +3,13 @@ import { checkEnv } from '../../core/checker.js'
 import { fileExists } from '../../utils/fs.js'
 import { logger } from '../../utils/logger.js'
 
-interface CheckOptions {
-  dir: string
-  schema: string
-  env: string
-}
+const SCHEMA = '.env.example'
+const ENV = '.env'
 
-export async function checkCommand(opts: CheckOptions): Promise<void> {
-  const schemaPath = path.join(opts.dir, opts.schema)
-  const envPath = path.join(opts.dir, opts.env)
+export async function checkCommand(): Promise<void> {
+  const cwd = process.cwd()
+  const schemaPath = path.join(cwd, SCHEMA)
+  const envPath = path.join(cwd, ENV)
 
   if (!(await fileExists(schemaPath))) {
     logger.error(`❌ Schema file not found: ${schemaPath}`)
@@ -49,7 +47,6 @@ export async function checkCommand(opts: CheckOptions): Promise<void> {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🎉 SUCCESS! ENV CHECK PASSED
 
-✅ All required variables are present in:
-   ${opts.dir}
+✅ All required variables are present.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`)
 }
